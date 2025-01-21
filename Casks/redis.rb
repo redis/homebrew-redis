@@ -5,7 +5,7 @@ cask "redis" do
   sha256 arm: "1232be3617c93ea20516483c650cc8142dff54e10b5b6a4835cd8b6d1e293763",
          intel: "ce8f834a2993b70d73a85eac0bc7277d0f869b57055d75e1d3b90bb66bf4e8b3"
 
-  url "https://redis-test-package-repository.s3.us-east-2.amazonaws.com/homebrew/redis-ce-#{version}-#{arch}.zip"
+  url "https://packages.redis.io/homebrew/redis-ce-#{version}-#{arch}.zip"
   name "Redis Community Edition - Pre-Release"
   desc "THIS IS A PRE-RELEASE VERSION!! Redis is an in-memory database that persists on disk. The data model is key-value, but many different kind of values are supported: Strings, Lists, Sets, Sorted Sets, Hashes, Streams, HyperLogLogs, Bitmaps."
   homepage "https://redis.io/"
