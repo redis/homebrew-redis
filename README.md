@@ -18,9 +18,9 @@ brew install --cask redis-rc
 
 Redis officially tests the latest version of this distribution against the following OSes:
 
-- macOS 13
-- macOS 14
-- macOS 15
+- macOS 15 (Sequoia)
+- macOS 14 (Sonoma)
+- macOS 13 (Ventura)
 
 ## Starting Redis
 
