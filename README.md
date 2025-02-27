@@ -16,7 +16,7 @@ brew install --cask redis-rc
 
 ## Supported Operating Systems
 
-Redis officially tests this distribution against the following OSes:
+Redis officially tests the latest version of this distribution against the following OSes:
 
 - macOS 13
 - macOS 14
@@ -35,7 +35,3 @@ If you want to start Redis in the background, you can use the following command:
 ```bash
 redis-server $(homebrew --prefix)/etc/redis.conf
 ```
-
-## Contributing
-
-If you would like to contribute to this project, please fork the repository and submit a pull request.
