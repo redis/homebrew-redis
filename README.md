@@ -1,8 +1,4 @@
-# Redis Community Edition Homebrew Cask
-
-This repository provides a Homebrew Cask for installing the Redis Community Edition binary distribution.
-
-## Installation
+## Redis Community Edition - Install using Homebrew Cask
 
 To install Redis Community Edition using Homebrew Cask, run the following command:
 
@@ -18,7 +14,15 @@ brew tap redis/redis
 brew install --cask redis-rc
 ```
 
-## Usage
+## Supported Operating Systems
+
+Redis officially tests this distribution against the following OSes:
+
+- macOS 13
+- macOS 14
+- macOS 15
+
+## Starting Redis
 
 After installation, you can start Redis using the following command:
 
