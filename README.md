@@ -1,6 +1,6 @@
 ## Redis Community Edition - Install using Homebrew Cask
 
-To install Redis Community Edition using Homebrew Cask, please use the following command:
+To install the latest version of Redis Community Edition using Homebrew Cask, please use the following command:
 
 ```bash
 brew tap redis/redis
