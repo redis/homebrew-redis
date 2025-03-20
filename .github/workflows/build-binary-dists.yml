@@ -17,7 +17,7 @@ on:
       - 'scripts/**'
 
 env:
-  REDIS_VERSION: "8.0-m03"
+  REDIS_VERSION: "8.0-m04"
 
 permissions:
   id-token: write
