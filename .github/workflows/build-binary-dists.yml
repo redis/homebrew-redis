@@ -8,7 +8,7 @@ on:
       - 'configs/**'
       - 'scripts/**'
 
-  pull_request_target:
+  pull_request:
     branches: [ main ]
     types: [ labeled ]
     paths:
@@ -59,8 +59,8 @@ jobs:
       - name: Build Redis CE
         id: build
         run: |
-          scripts/build.sh ${{ needs.set_variables.outputs.redis_version }}
-          echo "UNSIGNED_REDIS_BINARY=unsigned-redis-ce-${{ needs.set_variables.outputs.redis_version }}-$(uname -m).zip" >> $GITHUB_OUTPUT
+          scripts/build.sh ${{ fromJson(needs.set_variables.outputs.redis_version) }}
+          echo "UNSIGNED_REDIS_BINARY=unsigned-redis-ce-${{ fromJson(needs.set_variables.outputs.redis_version) }}-$(uname -m).zip" >> $GITHUB_OUTPUT
 
       - name: Upload Redis CE Binary Distribution
         uses: actions/upload-artifact@v4
@@ -115,8 +115,8 @@ jobs:
           done
 
           # Create distribution archive
-          (cd build_dir && zip -r ../redis-ce-${{ needs.set_variables.outputs.redis_version }}-$(uname -m).zip .)
-          echo "REDIS_BINARY=redis-ce-${{ needs.set_variables.outputs.redis_version }}-$(uname -m).zip" >> $GITHUB_OUTPUT
+          (cd build_dir && zip -r ../redis-ce-${{ fromJson(needs.set_variables.outputs.redis_version) }}-$(uname -m).zip .)
+          echo "REDIS_BINARY=redis-ce-${{ fromJson(needs.set_variables.outputs.redis_version) }}-$(uname -m).zip" >> $GITHUB_OUTPUT
 
       - name: Notarize Redis CE Binary Distribution
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
