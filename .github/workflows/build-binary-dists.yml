@@ -22,19 +22,25 @@ permissions:
 
 jobs:
   set_variables:
+    name: Extract variables from JSON config
     if: ${{ (github.event.label.name == 'build-binary-dists') || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
     runs-on: ubuntu-latest
     outputs:
-      redis_version: ${{ steps.json2vars.outputs.ref }}
+      redis_version: ${{ steps.read-attribute.outputs.redis_version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set variables from JSON
-        id: json2vars
-        uses: 7rikazhexde/json2vars-setter@960c8bc3bd6a6be70d5a6b9cf3ffd5190e0ff086
-        with:
-          json-file: configs/redis_version.json
+      - id: version
+        run: |
+            echo "json<<EOF" >> "$GITHUB_OUTPUT"
+            cat ./configs/redis_version.json >> "$GITHUB_OUTPUT"
+            echo >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Extract redis_version
+        id: read-attribute
+        run: echo "redis_version=${{fromJson(steps.version.outputs.json).ref}}" >> "$GITHUB_OUTPUT"
 
   build:
     if: ${{ (github.event.label.name == 'build-binary-dists') || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
@@ -59,8 +65,8 @@ jobs:
       - name: Build Redis CE
         id: build
         run: |
-          scripts/build.sh ${{ fromJson(needs.set_variables.outputs.redis_version) }}
-          echo "UNSIGNED_REDIS_BINARY=unsigned-redis-ce-${{ fromJson(needs.set_variables.outputs.redis_version) }}-$(uname -m).zip" >> $GITHUB_OUTPUT
+          scripts/build.sh ${{ needs.set_variables.outputs.redis_version }}
+          echo "UNSIGNED_REDIS_BINARY=unsigned-redis-ce-${{ needs.set_variables.outputs.redis_version }}-$(uname -m).zip" >> $GITHUB_OUTPUT
 
       - name: Upload Redis CE Binary Distribution
         uses: actions/upload-artifact@v4
@@ -115,8 +121,8 @@ jobs:
           done
 
           # Create distribution archive
-          (cd build_dir && zip -r ../redis-ce-${{ fromJson(needs.set_variables.outputs.redis_version) }}-$(uname -m).zip .)
-          echo "REDIS_BINARY=redis-ce-${{ fromJson(needs.set_variables.outputs.redis_version) }}-$(uname -m).zip" >> $GITHUB_OUTPUT
+          (cd build_dir && zip -r ../redis-ce-${{ needs.set_variables.outputs.redis_version }}-$(uname -m).zip .)
+          echo "REDIS_BINARY=redis-ce-${{ needs.set_variables.outputs.redis_version }}-$(uname -m).zip" >> $GITHUB_OUTPUT
 
       - name: Notarize Redis CE Binary Distribution
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
