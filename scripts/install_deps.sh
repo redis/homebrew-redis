@@ -10,15 +10,10 @@ brew install gnu-sed
 brew install automake
 brew install libtool
 
-rm -f /usr/local/bin/cmake
-CMAKE_VERSION=3.31.6
-mkdir ~/Downloads/CMake
-curl --location --retry 3 "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-macos-universal.dmg" --output ~/Downloads/CMake/cmake-macos.dmg
-hdiutil attach -mountpoint /Volumes/cmake-macos ~/Downloads/CMake/cmake-macos.dmg
-cp -R /Volumes/cmake-macos/CMake.app /Applications/
-hdiutil detach /Volumes/cmake-macos
-sudo "/Applications/CMake.app/Contents/bin/cmake-gui" --install=/usr/local/bin
-cmake --version
+curl -L -o cmake-3.31.6.tar.gz https://github.com/Kitware/CMake/releases/download/v3.31.6/cmake-3.31.6.tar.gz
+tar -xzf cmake-3.31.6.tar.gz
+cd cmake-3.31.6
+./bootstrap && make && sudo make install
 
 RUST_INSTALLER=rust-1.80.1-$(if [ "$(uname -m)" = "arm64" ]; then echo "aarch64"; else echo "x86_64"; fi)-apple-darwin
 echo "Downloading and installing Rust standalone installer: ${RUST_INSTALLER}"
