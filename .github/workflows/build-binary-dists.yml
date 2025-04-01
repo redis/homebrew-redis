@@ -16,18 +16,32 @@ on:
       - 'configs/**'
       - 'scripts/**'
 
-env:
-  REDIS_VERSION: "8.0-m04"
-
 permissions:
   id-token: write
   contents: read
 
 jobs:
+  set_variables:
+    if: ${{ (github.event.label.name == 'build-binary-dists') || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+    runs-on: ubuntu-latest
+    outputs:
+      redis_version: ${{ steps.json2vars.outputs.ref }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set variables from JSON
+        id: json2vars
+        uses: 7rikazhexde/json2vars-setter@960c8bc3bd6a6be70d5a6b9cf3ffd5190e0ff086
+        with:
+          json-file: configs/redis_version.json
+
   build:
     if: ${{ (github.event.label.name == 'build-binary-dists') || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+    needs: [set_variables]
     name: Build Redis CE MacOS Binary Distributions
     strategy:
+      fail-fast: false
       matrix:
         os_version:         # See: https://github.com/actions/runner-images/blob/main/README.md#available-images
           - macos-13        # macOS 13 x86_64
@@ -40,45 +54,13 @@ jobs:
 
       - name: Install build dependencies
         run: |
-          export HOMEBREW_NO_AUTO_UPDATE=1
-          brew update
-          brew install coreutils
-          brew install make
-          brew install openssl
-          brew install llvm@18
-          brew install cmake
-          brew install gnu-sed
-          brew install make
-          brew install automake
-          brew install libtool
-          
-          RUST_INSTALLER=rust-1.80.1-$(if [ "$(uname -m)" = "arm64" ]; then echo "aarch64"; else echo "x86_64"; fi)-apple-darwin
-          echo "Downloading and installing Rust standalone installer: ${RUST_INSTALLER}"
-          wget --quiet -O ${RUST_INSTALLER}.tar.xz https://static.rust-lang.org/dist/${RUST_INSTALLER}.tar.xz
-          tar -xf ${RUST_INSTALLER}.tar.xz
-          (cd ${RUST_INSTALLER} && sudo ./install.sh)
-          rm -rf ${RUST_INSTALLER}
+          scripts/install_deps.sh
 
       - name: Build Redis CE
         id: build
         run: |
-          export HOMEBREW_PREFIX="$(brew --prefix)"
-          export BUILD_WITH_MODULES=yes
-          export BUILD_TLS=yes
-          export DISABLE_WERRORS=yes
-          PATH="$HOMEBREW_PREFIX/opt/libtool/libexec/gnubin:$HOMEBREW_PREFIX/opt/llvm@18/bin:$HOMEBREW_PREFIX/opt/make/libexec/gnubin:$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin:$PATH" # Override macOS defaults.
-          export LDFLAGS="-L$HOMEBREW_PREFIX/opt/llvm@18/lib"
-          export CPPFLAGS="-I$HOMEBREW_PREFIX/opt/llvm@18/include"
-          
-          curl -L "https://github.com/redis/redis/archive/refs/tags/${{ vars.BINARY_VERSION_TO_BUILD }}.tar.gz" -o redis.tar.gz
-          tar xzf redis.tar.gz
-          
-          mkdir -p build_dir/etc
-          make -C redis-${{ vars.BINARY_VERSION_TO_BUILD }} -j "$(nproc)" all OS=macos
-          make -C redis-${{ vars.BINARY_VERSION_TO_BUILD }} install PREFIX=$(pwd)/build_dir OS=macos
-          cp ./configs/redis.conf build_dir/etc/redis.conf
-          (cd build_dir && zip -r ../redis-ce-${{ vars.BINARY_VERSION_TO_BUILD }}-$(uname -m).zip .)
-          echo "UNSIGNED_REDIS_BINARY=unsigned-redis-ce-${{ vars.BINARY_VERSION_TO_BUILD }}-$(uname -m).zip" >> $GITHUB_OUTPUT
+          scripts/build.sh ${{ needs.set_variables.outputs.redis_version }}
+          echo "UNSIGNED_REDIS_BINARY=unsigned-redis-ce-${{ needs.set_variables.outputs.redis_version }}-$(uname -m).zip" >> $GITHUB_OUTPUT
 
       - name: Upload Redis CE Binary Distribution
         uses: actions/upload-artifact@v4
@@ -133,8 +115,8 @@ jobs:
           done
 
           # Create distribution archive
-          (cd build_dir && zip -r ../redis-ce-${{ vars.BINARY_VERSION_TO_BUILD }}-$(uname -m).zip .)
-          echo "REDIS_BINARY=redis-ce-${{ vars.BINARY_VERSION_TO_BUILD }}-$(uname -m).zip" >> $GITHUB_OUTPUT
+          (cd build_dir && zip -r ../redis-ce-${{ needs.set_variables.outputs.redis_version }}-$(uname -m).zip .)
+          echo "REDIS_BINARY=redis-ce-${{ needs.set_variables.outputs.redis_version }}-$(uname -m).zip" >> $GITHUB_OUTPUT
 
       - name: Notarize Redis CE Binary Distribution
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
