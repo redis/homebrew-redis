@@ -8,8 +8,7 @@ on:
       - '.github/workflows/test.yml'
       - 'Casks/**'
       - 'configs/**'
-    paths-ignore:
-      - 'configs/redis_version.json'
+      - '!configs/redis_version.json'
 
 jobs:
   test:
