@@ -33,5 +33,5 @@ redis-server
 If you want to start Redis in the background, you can use the following command:
 
 ```bash
-redis-server $(homebrew --prefix)/etc/redis.conf
+redis-server $(brew --prefix)/etc/redis.conf
 ```
