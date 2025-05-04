@@ -37,7 +37,7 @@ jobs:
         run: |
           export HOMEBREW_GITHUB_API_TOKEN=$GITHUB_TOKEN
           brew update
-          brew tap ${{ vars.REDIS_TAP }} .
+          brew tap redis/redis .
 
       - name: Install Redis CE
         run: |
@@ -124,4 +124,4 @@ jobs:
       - name: Test uninstall
         run: |
           brew uninstall ${{ matrix.cask }}
-          brew untap ${{ vars.REDIS_TAP }}
+          brew untap redis/redis
