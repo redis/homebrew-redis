@@ -1,13 +1,13 @@
 cask "redis" do
   arch arm: "arm64", intel: "x86_64"
 
-  version "8.0-rc1"
-  sha256 arm: "c185dbeed8682658c170d7932507b2f2b7d90cdc4d8591a443f6cc1a0667f259",
-         intel: "68e6508c08963795d5e3e112173049dbb680a45f4600951f8e7bf6ff3891985d"
+  version "8.0.0"
+  sha256 arm: "e215d7df0a6af692b310b95c45b33b0cc5702682ce3245fee691551cd62c3201",
+         intel: "15e5d013a3a731a0d3e2323e2bbada7097da7a16e0ce775b24297dd0ecde502a"
 
   url "https://packages.redis.io/homebrew/redis-ce-#{version}-#{arch}.zip"
-  name "Redis Community Edition - Pre-Release"
-  desc "THIS IS A PRE-RELEASE VERSION!! Redis is an in-memory database that persists on disk. The data model is key-value, but many different kind of values are supported: Strings, Lists, Sets, Sorted Sets, Hashes, Streams, HyperLogLogs, Bitmaps."
+  name "Redis Open Source"
+  desc "Redis is an in-memory database that persists on disk. The data model is key-value, but many different kind of values are supported: Strings, Lists, Sets, Sorted Sets, Hashes, Streams, HyperLogLogs, Bitmaps."
   homepage "https://redis.io/"
 
   depends_on macos: ">= :ventura"
@@ -82,8 +82,7 @@ cask "redis" do
   end
 
   caveats <<~EOS
-    🚨THIS IS A PRE-RELEASE VERSION!! BREAKING CHANGES MAY OCCUR WITHOUT NOTICE!!🚨
-    Redis Community Edition has been successfully installed!
+    Redis Open Source has been successfully installed!
 
     The default configuration file has been copied to:
       #{HOMEBREW_PREFIX}/etc/redis.conf
