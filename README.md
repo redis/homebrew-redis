@@ -24,13 +24,7 @@ Redis officially tests the latest version of this distribution against the follo
 
 ## Starting Redis
 
-After installation, you can start Redis using the following command:
-
-```bash
-redis-server
-```
-
-If you want to start Redis in the background, you can use the following command:
+After installation, you can start Redis in the background using the following command:
 
 ```bash
 redis-server $(brew --prefix)/etc/redis.conf
