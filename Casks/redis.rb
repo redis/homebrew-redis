@@ -1,9 +1,9 @@
 cask "redis" do
   arch arm: "arm64", intel: "x86_64"
 
-  version "8.0.0"
-  sha256 arm: "e215d7df0a6af692b310b95c45b33b0cc5702682ce3245fee691551cd62c3201",
-         intel: "15e5d013a3a731a0d3e2323e2bbada7097da7a16e0ce775b24297dd0ecde502a"
+  version "8.0.1"
+  sha256 arm: "6d2394965a348d0bbd73b78595fd1c202c25b6048f780c0f9a257250492ab5c2",
+         intel: "3535a7025cc8a3dd95c000b5db1cefe2df530e38f38e1946a13ae4ad66daf825"
 
   url "https://packages.redis.io/homebrew/redis-ce-#{version}-#{arch}.zip"
   name "Redis Open Source"
@@ -15,7 +15,7 @@ cask "redis" do
   depends_on formula: "openssl@3"
   depends_on formula: "libomp"
   depends_on formula: "llvm@18"
-  
+
   conflicts_with formula: "redis-rc"
 
   binaries = %w[
@@ -26,7 +26,7 @@ cask "redis" do
     redis-sentinel
     redis-server
   ]
-  
+
   postflight do
     basepath = HOMEBREW_PREFIX.to_s
     caskbase = "#{caskroom_path}/#{version}"
