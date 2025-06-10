@@ -29,3 +29,9 @@ After installation, you can start Redis in the background using the following co
 ```bash
 redis-server $(brew --prefix)/etc/redis.conf
 ```
+
+To stop the service:
+
+```bash
+redis-cli shutdown
+```
