@@ -9,6 +9,13 @@ on:
       - 'Casks/**'
       - 'configs/**'
       - '!configs/redis_version.json'
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/test.yml'
+      - 'Casks/**'
+      - 'configs/**'
+      - '!configs/redis_version.json'
 
 jobs:
   test:
