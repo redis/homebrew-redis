@@ -19,7 +19,7 @@ on:
 
 jobs:
   test:
-    if: github.event.label.name == 'run-tests'
+    if: github.event.label.name == 'run-tests' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     name: Test Redis CE
     strategy:
       fail-fast: false
