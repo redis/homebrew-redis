@@ -1,58 +1,78 @@
-name: Test Redis CE
+name: Test Redis Unstable CE Package
 
 on:
-  pull_request:
-    types: [ labeled ]
-    branches: [ main ]
-    paths:
-      - '.github/workflows/test.yml'
-      - 'Casks/**'
-      - 'configs/**'
-      - '!configs/redis_version.json'
+  workflow_call:
+    inputs:
+      artifact_name:
+        description: 'Name of the Redis artifact to download for test'
+        required: true
+        type: string
+      runner:
+        description: 'OS version to run tests on'
+        required: true
+        type: string
 
 jobs:
   test:
-    if: github.event.label.name == 'run-tests'
     name: Test Redis CE
-    strategy:
-      fail-fast: false
-      matrix:
-        os_version:         # See: https://github.com/actions/runner-images/blob/main/README.md#available-images
-          - macos-15-large  # macOS 15 x86_64
-          - macos-15        # macOS 15 arm64
-          - macos-14-large  # macOS 14 x86_64
-          - macos-14        # macOS 14 arm64
-          - macos-13        # macOS 13 x86_64
-          - macos-13-xlarge # macOS 13 arm64
-        cask:
-          - redis
-          - redis-rc
-    
-    runs-on: ${{ matrix.os_version }}
-    
+    runs-on: ${{ inputs.runner }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Use unstable branch when called via workflow_call (from nightly scheduler)
+          # Use current branch when triggered by PR (for testing)
+          ref: ${{ github.event_name == 'workflow_call' && 'unstable' || github.ref }}
 
-      - name: Set up Homebrew
-        run: |
-          export HOMEBREW_GITHUB_API_TOKEN=$GITHUB_TOKEN
-          brew update
-          brew tap redis/redis .
+      - name: Download built package
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name }}
 
-      - name: Install Redis CE
+      - name: Install runtime dependencies
         run: |
-          brew install --cask ${{ matrix.cask }} --debug --verbose
-          ls -al $(brew --prefix)/etc/redis.conf
-          ls -al $(brew --prefix)/lib/redis/modules
-          ls -al $(brew --prefix)/bin/redis*
+          # Extract runtime dependencies from cask file
+          DEPS=$(grep 'depends_on formula:' Casks/redis.rb | sed 's/.*depends_on formula: "\([^"]*\)".*/\1/' | tr '\n' ' ')
+          echo "Installing runtime dependencies from cask file: $DEPS"
+          brew install $DEPS
+
+      - name: Extract and setup Redis
+        run: |
+          unzip unsigned-redis-ce-unstable-*.zip
+          echo "REDIS_HOME=$(pwd)" >> $GITHUB_ENV
+          echo "$(pwd)/bin" >> $GITHUB_PATH
+          chmod +x bin/redis-*
 
       - name: Test Redis Installation
         run: |
           redis-server --version
-          redis-server $(brew --prefix)/etc/redis.conf
-          for i in {1..30}; do redis-cli ping && break || echo "Waiting for Redis... $i" && sleep 1; done
-          redis-cli info server || { echo "Cannot get server info"; exit 1; }
+
+          # Load modules manually since we're using a custom build without pre-configured redis.conf
+          # (unlike the official cask which has modules pre-configured in the config file)
+          redis-server --port 6379 --daemonize yes --logfile redis-server.log \
+            --loadmodule "$REDIS_HOME/lib/redis/modules/redisbloom.so" \
+            --loadmodule "$REDIS_HOME/lib/redis/modules/redisearch.so" \
+            --loadmodule "$REDIS_HOME/lib/redis/modules/redistimeseries.so" \
+            --loadmodule "$REDIS_HOME/lib/redis/modules/rejson.so"
+
+          # Wait for Redis to start (same pattern as public repo)
+          for i in {1..30}; do
+            redis-cli ping && break || echo "Waiting for Redis... $i" && sleep 1
+          done
+
+          # Verify Redis is running and get info (same as public repo)
+          redis-cli info server || { echo "Cannot get server info"; cat redis-server.log; exit 1; }
           redis-cli module list
+
+          # Save logs for debugging
+          mkdir -p /tmp/redis-logs
+          cp redis-server.log /tmp/redis-logs/ 2>/dev/null || echo "No Redis logs to save"
+
+      - name: Upload Redis logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: redis-logs-${{ inputs.runner }}
+          path: /tmp/redis-logs/
 
       - name: Verify Installed Modules
         run: |
@@ -81,6 +101,7 @@ jobs:
           [ "$(redis-cli BF.EXISTS popular_keys "redis:list")" = "0" ] || \
             { echo "RedisBloom test failed: 'redis:list' found unexpectedly"; exit 1; }
           echo "RedisBloom test passed successfully"
+
       - name: Test RediSearch
         run: |
           redis-cli FT.CREATE redis_commands ON HASH PREFIX 1 cmd: SCHEMA name TEXT SORTABLE description TEXT
@@ -94,6 +115,7 @@ jobs:
             echo "RediSearch test failed: expected commands not found in search results"
             exit 1
           fi
+
       - name: Test RedisTimeSeries
         run: |
           redis-cli TS.CREATE redis:cpu:usage RETENTION 86400
@@ -109,6 +131,7 @@ jobs:
             echo "RedisTimeSeries test failed: expected values not found in time series"
             exit 1
           fi
+
       - name: Test ReJSON
         run: |
           redis-cli JSON.SET redis:config $ '{"maxmemory":"2gb","maxmemory-policy":"allkeys-lru"}'
@@ -121,7 +144,7 @@ jobs:
             exit 1
           fi
 
-      - name: Test uninstall
+      - name: Cleanup
+        if: always()
         run: |
-          brew uninstall ${{ matrix.cask }}
-          brew untap redis/redis
+          redis-cli shutdown || true
