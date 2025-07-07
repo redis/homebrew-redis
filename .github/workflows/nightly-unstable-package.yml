@@ -1,0 +1,10 @@
+name: Nightly Unstable Build and Package
+
+on:
+  schedule:
+    - cron: '0 1 * * *' # Run every day at 1:00 AM UTC
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  build-and-test-unstable:
+    uses: redis/homebrew-redis/.github/workflows/build-binary-dists.yml@unstable
