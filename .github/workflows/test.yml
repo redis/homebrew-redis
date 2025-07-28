@@ -61,10 +61,14 @@ jobs:
       - name: Test Redis Installation
         run: |
           redis-server --version
-          redis-server $(brew --prefix)/etc/redis.conf &
+          redis-server $(brew --prefix)/etc/redis.conf --logfile redis-server.log &
           for i in {1..30}; do redis-cli ping && break || echo "Waiting for Redis... $i" && sleep 1; done
-          redis-cli info server || { echo "Cannot get server info"; exit 1; }
+          redis-cli info server || { echo "Cannot get server info"; cat redis-server.log; exit 1; }
           redis-cli module list
+
+          # Save logs for debugging
+          mkdir -p /tmp/redis-logs
+          cp redis-server.log /tmp/redis-logs/ 2>/dev/null || echo "No Redis logs to save"
 
       - name: Upload Redis logs
         if: failure()
