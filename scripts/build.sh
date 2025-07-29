@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 export HOMEBREW_PREFIX="$(brew --prefix)"
 export BUILD_WITH_MODULES=yes
 export MODULE_VERSION=master
