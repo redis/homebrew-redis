@@ -12,7 +12,14 @@ brew install gnu-sed
 brew install automake
 brew install libtool
 
+# Ensure Homebrew's cmake does not interfere
+brew uninstall --ignore-dependencies cmake || true
+
+# Clean up any stale CMake symlinks
 rm -f /usr/local/bin/cmake
+rm -f /usr/local/bin/ctest
+rm -f /usr/local/bin/cpack
+
 CMAKE_VERSION=3.31.6
 mkdir ~/Downloads/CMake
 curl --location --retry 3 "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-macos-universal.dmg" --output ~/Downloads/CMake/cmake-macos.dmg
