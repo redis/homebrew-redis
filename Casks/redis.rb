@@ -1,9 +1,9 @@
 cask "redis" do
   arch arm: "arm64", intel: "x86_64"
 
-  version "8.0.3"
-  sha256 arm: "045ca5ffcb9ecdd399b4fdece05d91e2c10bfe571fd61892417119570cfc55ff",
-         intel: "552d47e9e5aacbe97dbacf486f4557ffea7655b84d915704d5bcddb049137fd8"
+  version "8.2.1"
+  sha256 arm: "d91cb753147fb1c30ad10f159f7cbb2df8ee3ffae477037147cd38a219762d3d",
+         intel: "af942764d5661cd5bb9968da9a0ef7e588d0f941732ede668acbb5829197a96f"
 
   url "https://packages.redis.io/homebrew/redis-ce-#{version}-#{arch}.zip"
   name "Redis Open Source"
