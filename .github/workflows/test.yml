@@ -48,6 +48,7 @@ jobs:
 
       - name: Install Redis CE
         run: |
+          set -x
           brew install --cask ${{ matrix.cask }} --debug --verbose
           ls -al $(brew --prefix)/etc/redis.conf || echo "redis.conf not found"
           ls -al $(brew --prefix)/lib/redis/modules || echo "modules dir not found"
