@@ -48,20 +48,10 @@ jobs:
 
       - name: Install Redis CE
         run: |
-          set -x
-          brew install --cask ${{ matrix.cask }} --debug --verbose 2>&1 | tee install.log
-          INSTALL_EXIT_CODE=${PIPESTATUS[0]}
-          echo "Brew install actual exit code: $INSTALL_EXIT_CODE"
-          
-          if [ $INSTALL_EXIT_CODE -ne 0 ]; then
-            echo "ERROR: brew install failed"
-            tail -100 install.log
-            exit 1
-          fi
-          
-          ls -al $(brew --prefix)/etc/redis.conf || echo "redis.conf not found"
-          ls -al $(brew --prefix)/lib/redis/modules || echo "modules dir not found"  
-          ls -al $(brew --prefix)/bin/redis* || echo "redis binaries not found"
+          brew install --cask ${{ matrix.cask }} --debug --verbose || true
+          ls -al $(brew --prefix)/etc/redis.conf
+          ls -al $(brew --prefix)/lib/redis/modules
+          ls -al $(brew --prefix)/bin/redis*
 
       - name: Test Redis Installation
         run: |
