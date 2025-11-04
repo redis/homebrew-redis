@@ -50,8 +50,8 @@ jobs:
       fail-fast: false
       matrix:
         os_version:         # See: https://github.com/actions/runner-images/blob/main/README.md#available-images
-          - macos-13        # macOS 13 x86_64
-          - macos-13-xlarge # macOS 13 arm64
+          - macos-14        # macOS 13 x86_64
+          - macos-14-xlarge # macOS 13 arm64
     
     runs-on: ${{ matrix.os_version }}
     
