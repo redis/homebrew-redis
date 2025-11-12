@@ -16,8 +16,6 @@ cask "redis" do
   depends_on formula: "libomp"
   depends_on formula: "llvm@18"
 
-  conflicts_with formula: "redis-rc"
-
   binaries = %w[
     redis-cli
     redis-benchmark
