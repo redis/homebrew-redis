@@ -1,4 +1,6 @@
 # This workflow is part of the Redis OSS release automation process.
+name: Release Build and Test
+
 on:
   workflow_dispatch:
     inputs:
