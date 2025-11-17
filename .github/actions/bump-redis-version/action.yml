@@ -1,3 +1,6 @@
+name: Edit redis version
+description: Edit redis version action
+
 inputs:
   release_tag:
     description: 'Release tag to build'
