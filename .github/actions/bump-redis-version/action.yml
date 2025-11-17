@@ -16,7 +16,7 @@ inputs:
 outputs:
   changed_files:
     description: 'List of files that were modified'
-    value: ${{ steps.apply-version.outputs.changed_files }}
+    value: ${{ steps.bump-version.outputs.changed_files }}
 
 runs:
   using: "composite"
