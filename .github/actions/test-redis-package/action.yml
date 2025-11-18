@@ -8,6 +8,9 @@ inputs:
   cask:
     description: 'Cask to test'
     required: true
+  tap:
+    description: 'Tap to test'
+    required: true
 
 runs:
   using: "composite"
@@ -25,11 +28,11 @@ runs:
     run: |
       export HOMEBREW_GITHUB_API_TOKEN=$GITHUB_TOKEN
       brew update
-      brew tap ${{ vars.REDIS_TAP }} .
+      brew tap ${{ inputs.tap }} .
   - name: Edit cask file
     shell: bash
     run: |
-      ${{ github.action_path }}/edit-cask.sh --cask ${{ inputs.cask }} --binary "$(pwd)/$ARTIFACT_NAME" ${{ inputs.redis_version }}
+      ${{ github.action_path }}/edit-cask.sh --cask ${{ inputs.cask }} --binary "$(pwd)/$ARTIFACT_NAME" --tap ${{ inputs.tap }} ${{ inputs.redis_version }}
   - name: Install Redis CE
     shell: bash
     run: |
@@ -119,4 +122,4 @@ runs:
     shell: bash
     run: |
       brew uninstall ${{ inputs.cask }}
-      brew untap ${{ vars.REDIS_TAP }}
+      brew untap ${{ inputs.tap }}
