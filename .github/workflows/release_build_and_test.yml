@@ -51,6 +51,7 @@ jobs:
     uses: ./.github/workflows/build-n-test.yml
     with:
       release_tag: ${{ github.event.inputs.release_tag }}
+    secrets: inherit
 
   create-release-handle:
     needs: build-n-test

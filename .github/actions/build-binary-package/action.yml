@@ -38,11 +38,11 @@ runs:
       scripts/build.sh ${{ inputs.redis_version }}
       echo "UNSIGNED_REDIS_BINARY=unsigned-redis-ce-${{ inputs.redis_version }}-$(uname -m).zip" >> $GITHUB_OUTPUT
   #check if upload for unstable
-  - name: Upload Redis CE Binary Distribution
-    uses: actions/upload-artifact@v4
-    with:
-      path: ./${{ steps.build.outputs.UNSIGNED_REDIS_BINARY }}
-      name: ${{ steps.build.outputs.UNSIGNED_REDIS_BINARY }}
+#  - name: Upload Redis CE Binary Distribution
+#    uses: actions/upload-artifact@v4
+#    with:
+#      path: ./${{ steps.build.outputs.UNSIGNED_REDIS_BINARY }}
+#      name: ${{ steps.build.outputs.UNSIGNED_REDIS_BINARY }}
   - name: Setup Keychain and Certificate
     shell: bash
     run: |
