@@ -33,6 +33,13 @@ jobs:
     - uses: ./.github/actions/build-binary-package
       with:
         redis_version: ${{ inputs.release_tag }}
+        MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+        MACOS_KEYCHAIN_PASSWORD: ${{ secrets.MACOS_KEYCHAIN_PASSWORD }}
+        MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+        MAC_NOTARIZE_USERNAME: ${{ secrets.MAC_NOTARIZE_USERNAME }}
+        MAC_NOTARIZE_PASSWORD: ${{ secrets.MAC_NOTARIZE_PASSWORD }}
+        MAC_NOTARIZE_TEAM_ID: ${{ secrets.MAC_NOTARIZE_TEAM_ID }}
+
 
   test:
     name: Test Redis CE
