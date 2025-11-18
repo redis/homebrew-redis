@@ -1,4 +1,4 @@
-name: Build Redis CE MacOS Binary Distributions
+name: Build Redis MacOS Binary Distributions
 
 on:
   push:
@@ -45,7 +45,7 @@ jobs:
   build:
     if: ${{ (github.event.label.name == 'build-binary-dists') || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
     needs: [set_variables]
-    name: Build Redis CE MacOS Binary Distributions
+    name: Build Redis MacOS Binary Distributions
     strategy:
       fail-fast: false
       matrix:
@@ -62,13 +62,13 @@ jobs:
         run: |
           scripts/install_deps.sh
 
-      - name: Build Redis CE
+      - name: Build Redis
         id: build
         run: |
           scripts/build.sh ${{ needs.set_variables.outputs.redis_version }}
-          echo "UNSIGNED_REDIS_BINARY=unsigned-redis-ce-${{ needs.set_variables.outputs.redis_version }}-$(uname -m).zip" >> $GITHUB_OUTPUT
+          echo "UNSIGNED_REDIS_BINARY=unsigned-redis-oss-${{ needs.set_variables.outputs.redis_version }}-$(uname -m).zip" >> $GITHUB_OUTPUT
 
-      - name: Upload Redis CE Binary Distribution
+      - name: Upload Redis Binary Distribution
         uses: actions/upload-artifact@v4
         with:
           path: ./${{ steps.build.outputs.UNSIGNED_REDIS_BINARY }}
@@ -121,10 +121,10 @@ jobs:
           done
 
           # Create distribution archive
-          (cd build_dir && zip -r ../redis-ce-${{ needs.set_variables.outputs.redis_version }}-$(uname -m).zip .)
-          echo "REDIS_BINARY=redis-ce-${{ needs.set_variables.outputs.redis_version }}-$(uname -m).zip" >> $GITHUB_OUTPUT
+          (cd build_dir && zip -r ../redis-oss-${{ needs.set_variables.outputs.redis_version }}-$(uname -m).zip .)
+          echo "REDIS_BINARY=redis-oss-${{ needs.set_variables.outputs.redis_version }}-$(uname -m).zip" >> $GITHUB_OUTPUT
 
-      - name: Notarize Redis CE Binary Distribution
+      - name: Notarize Redis Binary Distribution
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           sh scripts/notarize.sh ${{ steps.sign.outputs.REDIS_BINARY }} com.redis.redis ${{ secrets.MAC_NOTARIZE_USERNAME }} ${{ secrets.MAC_NOTARIZE_PASSWORD }} ${{ secrets.MAC_NOTARIZE_TEAM_ID }}
@@ -135,7 +135,7 @@ jobs:
           aws-region: ${{ secrets.S3_REGION }}
           role-to-assume: ${{ secrets.S3_IAM_ARN }}
 
-      - name: Upload Redis CE Binary Distribution to S3
+      - name: Upload Redis Binary Distribution to S3
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           aws s3 cp ${{ steps.sign.outputs.REDIS_BINARY }} s3://${{ secrets.S3_BUCKET }}/homebrew/ --acl public-read
