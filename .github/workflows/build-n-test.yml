@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         os_version:         # See: https://github.com/actions/runner-images/blob/main/README.md#available-images
-          - macos-14        # macOS 14 x86_64
+          - macos-14-large        # macOS 14 x86_64
           - macos-14-xlarge # macOS 14 arm64
     runs-on: ${{ matrix.os_version }}
     steps:
@@ -28,7 +28,7 @@ jobs:
       with:
         release_tag: ${{ inputs.release_tag }}
         allow_modify: false
-        release_branch: "main"
+        release_branch: ${{ github.ref_name }}
         gh_token: ${{ secrets.GITHUB_TOKEN }}
     - uses: ./.github/actions/build-binary-package
       with:
