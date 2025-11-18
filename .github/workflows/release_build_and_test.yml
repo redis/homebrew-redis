@@ -34,7 +34,7 @@ jobs:
         uses: redis-developer/redis-oss-release-automation/.github/actions/ensure-release-branch@main
         with:
           release_tag: ${{ github.event.inputs.release_tag }}
-          release_branch: "main"
+          release_branch: ${{ github.ref_name }}
           allow_modify: true
           gh_token: ${{ secrets.GITHUB_TOKEN }}
 
