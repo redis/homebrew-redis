@@ -23,4 +23,4 @@ mkdir -p build_dir/etc
 make -C redis-$REDIS_VERSION -j "$(nproc)" all OS=macos
 make -C redis-$REDIS_VERSION install PREFIX=$(pwd)/build_dir OS=macos
 cp ./configs/redis.conf build_dir/etc/redis.conf
-(cd build_dir && zip -r ../redis-ce-$REDIS_VERSION-$(uname -m).zip .)
+(cd build_dir && zip -r ../redis-oss-$REDIS_VERSION-$(uname -m).zip .)
