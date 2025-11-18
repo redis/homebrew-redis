@@ -2,9 +2,6 @@
 name: Release Build and Test
 
 on:
-  push:
-    branches:
-      - release_automation
   workflow_dispatch:
     inputs:
       release_tag:
