@@ -5,6 +5,24 @@ inputs:
   redis_version:
     description: 'Version to build'
     required: true
+  MACOS_CERTIFICATE:
+    description: 'MacOS certificate'
+    required: true
+  MACOS_KEYCHAIN_PASSWORD:
+    description: 'MacOS keychain password'
+    required: true
+  MACOS_CERTIFICATE_PASSWORD:
+    description: 'MacOS certificate password'
+    required: true
+  MAC_NOTARIZE_USERNAME:
+    description: 'Mac notarize username'
+    required: true
+  MAC_NOTARIZE_PASSWORD:
+    description: 'Mac notarize password'
+    required: true
+  MAC_NOTARIZE_TEAM_ID:
+    description: 'Mac notarize team ID'
+    required: true
 
 runs:
   using: "composite"
@@ -29,17 +47,17 @@ runs:
     shell: bash
     run: |
       # Decode and save certificate
-      echo "${{ secrets.MACOS_CERTIFICATE }}" | base64 --decode > certificate.p12
+      echo "${{ inputs.MACOS_CERTIFICATE }}" | base64 --decode > certificate.p12
       # Create and configure keychain
-      security create-keychain -p "${{ secrets.MACOS_KEYCHAIN_PASSWORD }}" build.keychain
-      security unlock-keychain -p "${{ secrets.MACOS_KEYCHAIN_PASSWORD }}" build.keychain
+      security create-keychain -p "${{ inputs.MACOS_KEYCHAIN_PASSWORD }}" build.keychain
+      security unlock-keychain -p "${{ inputs.MACOS_KEYCHAIN_PASSWORD }}" build.keychain
       security set-keychain-settings -t 3600 -l build.keychain
       # Add to search list and set as default
       security list-keychains -d user -s build.keychain login.keychain
       security default-keychain -s build.keychain
       # Import and trust certificate
-      security import certificate.p12 -k build.keychain -P "${{ secrets.MACOS_CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
-      security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "${{ secrets.MACOS_KEYCHAIN_PASSWORD }}" build.keychain
+      security import certificate.p12 -k build.keychain -P "${{ inputs.MACOS_CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
+      security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "${{ inputs.MACOS_KEYCHAIN_PASSWORD }}" build.keychain
       # Debug certificate presence
       security find-identity -v -p codesigning build.keychain
   - name: Sign Binaries
@@ -68,7 +86,7 @@ runs:
   - name: Notarize Redis CE Binary Distribution
     shell: bash
     run: |
-      sh scripts/notarize.sh ${{ steps.sign.outputs.REDIS_BINARY }} com.redis.redis ${{ secrets.MAC_NOTARIZE_USERNAME }} ${{ secrets.MAC_NOTARIZE_PASSWORD }} ${{ secrets.MAC_NOTARIZE_TEAM_ID }}
+      sh scripts/notarize.sh ${{ steps.sign.outputs.REDIS_BINARY }} com.redis.redis ${{ inputs.MAC_NOTARIZE_USERNAME }} ${{ inputs.MAC_NOTARIZE_PASSWORD }} ${{ inputs.MAC_NOTARIZE_TEAM_ID }}
   - name: Upload Redis CE Binary Distribution
     uses: actions/upload-artifact@v4
     with:
