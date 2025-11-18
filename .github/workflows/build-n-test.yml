@@ -1,0 +1,62 @@
+name: Build and Test All Distros
+
+on:
+  workflow_call:
+    inputs:
+      release_tag:
+        type: string
+
+jobs:
+  build-binary-package:
+    name: Build Redis CE MacOS Binary Distributions
+    strategy:
+      fail-fast: false
+      matrix:
+        os_version:         # See: https://github.com/actions/runner-images/blob/main/README.md#available-images
+          - macos-13        # macOS 13 x86_64
+          - macos-13-xlarge # macOS 13 arm64
+    runs-on: ${{ matrix.os_version }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.release_tag == 'unstable' && 'unstable' || '' }}
+    - name: Ensure Release Branch
+      if: inputs.release_tag != '' && inputs.release_tag != 'unstable'
+      id: ensure-branch
+      uses: redis-developer/redis-oss-release-automation/.github/actions/ensure-release-branch@main
+      with:
+        release_tag: ${{ inputs.release_tag }}
+        allow_modify: false
+        release_branch: "main"
+        gh_token: ${{ secrets.GITHUB_TOKEN }}
+    - uses: ./.github/actions/build-binary-package
+      with:
+        redis_version: ${{ inputs.release_tag }}
+
+  test:
+    name: Test Redis CE
+    needs: build-binary-package
+    strategy:
+      fail-fast: false
+      matrix:
+        os_version:         # See: https://github.com/actions/runner-images/blob/main/README.md#available-images
+          - macos-15-large  # macOS 15 x86_64
+          - macos-15        # macOS 15 arm64
+          - macos-14-large  # macOS 14 x86_64
+          - macos-14        # macOS 14 arm64
+          - macos-13        # macOS 13 x86_64
+          - macos-13-xlarge # macOS 13 arm64
+        cask:
+          - redis
+          - redis-rc
+    runs-on: ${{ matrix.os_version }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.release_tag == 'unstable' && 'unstable' || '' }}
+    - uses: ./.github/actions/test-binary-package
+      with:
+        redis_version: ${{ inputs.release_tag }}
+        cask: ${{ matrix.cask }}
