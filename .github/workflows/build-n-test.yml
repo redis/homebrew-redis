@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-binary-package:
-    name: Build Redis CE MacOS Binary Distributions
+    name: Build Redis MacOS Binary Distributions
     strategy:
       fail-fast: false
       matrix:

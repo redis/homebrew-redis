@@ -1,5 +1,5 @@
-name: Build Redis CE MacOS Binary Distributions
-description: Binary build action
+name: Build Redis MacOS Binary Distributions
+description: Test binary action
 
 inputs:
   redis_version:
@@ -32,8 +32,8 @@ runs:
   - name: Edit cask file
     shell: bash
     run: |
-      ${{ github.action_path }}/edit-cask.sh --cask ${{ inputs.cask }} --binary "$(pwd)/$ARTIFACT_NAME" --tap ${{ inputs.tap }} ${{ inputs.redis_version }}
-  - name: Install Redis CE
+      ${{ github.action_path }}/../common/edit-cask.sh --cask ${{ inputs.cask }} --action test --binary "$(pwd)/$ARTIFACT_NAME" --tap ${{ inputs.tap }} ${{ inputs.redis_version }}
+  - name: Install Redis
     shell: bash
     run: |
       brew install --cask ${{ inputs.cask }} --debug --verbose || true
