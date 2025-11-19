@@ -26,7 +26,7 @@ usage() {
     echo ""
     echo "Examples:"
     echo "  # For testing with binary:"
-    echo "  $0 --cask redis --action test --binary redis-ce-8.2.3-arm64.zip 8.2.3"
+    echo "  $0 --cask redis --action test --binary redis-oss-8.2.3-arm64.zip 8.2.3"
     echo ""
     echo "  # For publishing with package JSON:"
     echo "  $0 --cask redis --action publish --package-json '{\"arm64\":{\"sha256\":\"abc123...\"}}' 8.2.3"
