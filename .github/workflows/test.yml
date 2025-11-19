@@ -1,4 +1,4 @@
-name: Test Redis CE
+name: Test Redis
 
 on:
   pull_request:
@@ -20,7 +20,7 @@ on:
 jobs:
   test:
     if: github.event.label.name == 'run-tests' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
-    name: Test Redis CE
+    name: Test Redis
     strategy:
       fail-fast: false
       matrix:
@@ -29,8 +29,6 @@ jobs:
           - macos-15        # macOS 15 arm64
           - macos-14-large  # macOS 14 x86_64
           - macos-14        # macOS 14 arm64
-          - macos-13        # macOS 13 x86_64
-          - macos-13-xlarge # macOS 13 arm64
         cask:
           - redis
           - redis-rc
@@ -46,7 +44,7 @@ jobs:
           brew update
           brew tap ${{ vars.REDIS_TAP }} .
 
-      - name: Install Redis CE
+      - name: Install Redis
         run: |
           brew install --cask ${{ matrix.cask }} --debug --verbose || true
           ls -al $(brew --prefix)/etc/redis.conf
