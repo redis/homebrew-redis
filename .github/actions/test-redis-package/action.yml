@@ -18,7 +18,7 @@ runs:
   - name: Detect artifact name
     id: artifact_name
     shell: bash
-    run: echo "ARTIFACT_NAME=redis-ce-${{ inputs.redis_version }}-$(uname -m).zip" >> "$GITHUB_ENV"
+    run: echo "ARTIFACT_NAME=redis-oss-${{ inputs.redis_version }}-$(uname -m).zip" >> "$GITHUB_ENV"
   - name: Get binary packages
     uses: actions/download-artifact@v4
     with:
