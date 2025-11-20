@@ -8,6 +8,9 @@ inputs:
   release_type:
     description: "Type of release to upload (public, internal)"
     required: true
+  release_tag:
+    description: 'Release tag to publish'
+    required: true
   gh_token:
     description: "GitHub token"
     required: true
@@ -20,8 +23,8 @@ inputs:
   BREW_S3_REGION:
     description: "S3 region to upload to"
     required: false
-  cask:
-    description: 'Cask to publish'
+  channel:
+    description: 'Type of stability (stable, rc)'
     required: true
 
 outputs:
@@ -37,6 +40,10 @@ runs:
     run: |
       if [ "${{ inputs.release_type }}" != "public" ] && [ "${{ inputs.release_type }}" != "internal" ]; then
         echo "Invalid release_type: ${{ inputs.release_type }}"
+        exit 1
+      fi
+      if [ "${{ inputs.channel }}" != "stable" ] && [ "${{ inputs.channel }}" != "rc" ]; then
+        echo "Invalid channel: ${{ inputs.channel }}"
         exit 1
       fi
       if  [ -z "${{ inputs.BREW_S3_BUCKET }}" ] || [ -z "${{ inputs.BREW_S3_REGION }}" ] || [ -z "${{ inputs.BREW_S3_IAM_ARN }}" ]; then
@@ -89,4 +96,9 @@ runs:
   - name: Edit cask file
     shell: bash
     run: |
-      ${{ github.action_path }}/../common/edit-cask.sh --cask ${{ inputs.cask }} --action publish --package-json $packages_sha256_json --tap ${{ inputs.tap }} ${{ inputs.redis_version }}
+      if [ "${{ inputs.channel }}" == "stable" ]; then
+        ${{ github.action_path }}/../common/edit-cask.sh --cask redis --action publish --package-json "$packages_sha256_json" ${{ inputs.release_tag }}
+        ${{ github.action_path }}/../common/edit-cask.sh --cask redis-rc --action publish --package-json "$packages_sha256_json" ${{ inputs.release_tag }}
+      elif [ "${{ inputs.channel }}" == "rc" ]; then
+        ${{ github.action_path }}/../common/edit-cask.sh --cask redis-rc --action publish --package-json "$packages_sha256_json" ${{ inputs.release_tag }}
+      fi
