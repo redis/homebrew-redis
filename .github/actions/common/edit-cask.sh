@@ -75,8 +75,8 @@ edit_cask_file(){
         # Update sha256 values in cask file
         if [ -n "$arm_sha" ] && [ -n "$intel_sha" ]; then
             # Replace existing sha256 line with new values
-            sed -i '' "s/sha256 arm: \"[^\"]*\",$/sha256 arm: \"$arm_sha\",/" $casks_path
-            sed -i '' "/sha256 arm:/,/intel:/ s/intel: \"[^\"]*\"/intel: \"$intel_sha\"/" "$casks_path"
+            sed -i "s/sha256 arm: \"[^\"]*\",$/sha256 arm: \"$arm_sha\",/" $casks_path
+            sed -i "/sha256 arm:/,/intel:/ s/intel: \"[^\"]*\"/intel: \"$intel_sha\"/" "$casks_path"
         else
             echo "Error: Missing sha256 values in package_json"
             exit 1
@@ -88,7 +88,7 @@ edit_cask_file(){
     fi
 
     # Change version
-    sed -i '' "s/version \"[^\"]*\"/version \"$tag\"/" $casks_path
+    sed -i "s/version \"[^\"]*\"/version \"$tag\"/" $casks_path
 }
 
 # Parse command line arguments
