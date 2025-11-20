@@ -1,8 +1,5 @@
 # This workflow is part of the Redis OSS release automation process.
 on:
-  push:
-    branches:
-      - release_automation
   workflow_dispatch:
     inputs:
       release_tag:
