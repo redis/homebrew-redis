@@ -14,8 +14,8 @@ on:
       release_handle:
         description: 'JSON string containing release handle information'
         required: true
-      cask:
-        description: 'Cask to publish'
+      channel:
+        description: 'Type of stability (stable, rc)'
         required: true
 
 # UUID is used to help automation to identify workflow run in the list of workflow runs.
@@ -72,11 +72,12 @@ jobs:
         with:
           run_id: ${{ steps.parse-handle.outputs.run_id }}
           release_type: ${{ github.event.inputs.release_type }}
+          release_tag: ${{ github.event.inputs.release_tag }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
+          channel: ${{ inputs.channel }}
           BREW_S3_REGION: ${{ github.event.inputs.release_type == 'public' && secrets.S3_REGION || secrets.S3_REGION_STAGING }}
           BREW_S3_BUCKET: ${{ github.event.inputs.release_type == 'public' && secrets.S3_BUCKET || secrets.S3_BUCKET_STAGING }}
           BREW_S3_IAM_ARN: ${{ github.event.inputs.release_type == 'public' && secrets.S3_IAM_ARN || secrets.S3_IAM_ARN_STAGING }}
-          cask: ${{ inputs.cask }}
 
       - name: Merge back to release branch
         id: merge-back
