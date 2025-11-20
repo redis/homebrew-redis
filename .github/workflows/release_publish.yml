@@ -120,23 +120,23 @@ jobs:
           path: result.json
           retention-days: 90
 
-#      - name: Send Success Slack notification
-#        uses: ./.github/actions/slack-notification
-#        with:
-#          slack_func: slack_format_success_message
-#          release_tag: ${{ github.event.inputs.release_tag }}
-#          url_prefix: ${{ steps.validate-inputs.outputs.url_prefix }}
-#          env: ${{ steps.validate-inputs.outputs.env_name }}
-#          packages_json: ${{ steps.upload.outputs.packages_json }}
-#          SLACK_WEB_HOOK_URL: ${{ secrets.SLACK_WEB_HOOK_URL }}
-#
-#      - name: Send Failure Slack notification
-#        if: failure()
-#        uses: ./.github/actions/slack-notification
-#        with:
-#          slack_func: slack_format_failure_message
-#          release_tag: ${{ github.event.inputs.release_tag }}
-#          env: ${{ steps.validate-inputs.outputs.env_name }}
-#          packages_json: ${{ steps.upload.outputs.packages_json }}
-#          message: ":debian: Debian package upload failed"
-#          SLACK_WEB_HOOK_URL: ${{ secrets.SLACK_WEB_HOOK_URL }}
+      - name: Send Success Slack notification
+        uses: ./.github/actions/slack-notification
+        with:
+          slack_func: slack_format_success_message
+          release_tag: ${{ github.event.inputs.release_tag }}
+          url_prefix: ${{ steps.validate-inputs.outputs.url_prefix }}
+          env: ${{ steps.validate-inputs.outputs.env_name }}
+          packages_json: ${{ steps.upload.outputs.packages_json }}
+          SLACK_WEB_HOOK_URL: ${{ secrets.SLACK_WEB_HOOK_URL }}
+
+      - name: Send Failure Slack notification
+        if: failure()
+        uses: ./.github/actions/slack-notification
+        with:
+          slack_func: slack_format_failure_message
+          release_tag: ${{ github.event.inputs.release_tag }}
+          env: ${{ steps.validate-inputs.outputs.env_name }}
+          packages_json: ${{ steps.upload.outputs.packages_json }}
+          message: ":debian: Debian package upload failed"
+          SLACK_WEB_HOOK_URL: ${{ secrets.SLACK_WEB_HOOK_URL }}
