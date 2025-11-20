@@ -138,5 +138,5 @@ jobs:
           release_tag: ${{ github.event.inputs.release_tag }}
           env: ${{ steps.validate-inputs.outputs.env_name }}
           packages_json: ${{ steps.upload.outputs.packages_json }}
-          message: ":debian: Debian package upload failed"
+          message: ":homebrew: Homebrew package upload failed"
           SLACK_WEB_HOOK_URL: ${{ secrets.SLACK_WEB_HOOK_URL }}
