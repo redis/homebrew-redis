@@ -73,6 +73,7 @@ jobs:
           run_id: ${{ steps.parse-handle.outputs.run_id }}
           release_type: ${{ github.event.inputs.release_type }}
           release_tag: ${{ github.event.inputs.release_tag }}
+          release_version_branch: ${{ steps.ensure-branch.outputs.release_version_branch }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           channel: ${{ inputs.channel }}
           BREW_S3_REGION: ${{ github.event.inputs.release_type == 'public' && secrets.S3_REGION || secrets.S3_REGION_STAGING }}

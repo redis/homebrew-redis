@@ -11,6 +11,9 @@ inputs:
   release_tag:
     description: 'Release tag to publish'
     required: true
+  release_version_branch:
+    description: 'Release version changes'
+    required: true
   gh_token:
     description: "GitHub token"
     required: true
@@ -94,11 +97,27 @@ runs:
       echo "EOF" >> $GITHUB_OUTPUT
 
   - name: Edit cask file
+    id: edit-cask-file
     shell: bash
     run: |
       if [ "${{ inputs.channel }}" == "stable" ]; then
         ${{ github.action_path }}/../common/edit-cask.sh --cask redis --action publish --package-json "$packages_sha256_json" ${{ inputs.release_tag }}
-        ${{ github.action_path }}/../common/edit-cask.sh --cask redis-rc --action publish --package-json "$packages_sha256_json" ${{ inputs.release_tag }}
-      elif [ "${{ inputs.channel }}" == "rc" ]; then
-        ${{ github.action_path }}/../common/edit-cask.sh --cask redis-rc --action publish --package-json "$packages_sha256_json" ${{ inputs.release_tag }}
       fi
+      ${{ github.action_path }}/../common/edit-cask.sh --cask redis-rc --action publish --package-json "$packages_sha256_json" ${{ inputs.release_tag }}
+      # Check what files actually changed in git
+      changed_files=$(git diff --name-only Casks/)
+      if [ -n "$changed_files" ]; then
+        echo "changed_files<<EOF" >> "$GITHUB_ENV"
+        echo "$changed_files" >> "$GITHUB_ENV"
+        echo "EOF" >> "$GITHUB_ENV"
+      else
+        echo "changed_files=" >> "$GITHUB_ENV"
+      fi
+
+  - name: Create verified commit
+    if: ${{ env.changed_files }} != ''
+    uses: iarekylew00t/verified-bot-commit@v1
+    with:
+      message: ${{ inputs.release_tag }}
+      files: ${{ env.changed_files }}
+      ref: ${{ inputs.release_version_branch }}
