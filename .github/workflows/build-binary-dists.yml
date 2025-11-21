@@ -7,11 +7,6 @@ on:
       - '.github/workflows/build-binary-dists.yml'
       - 'configs/**'
       - 'scripts/**'
-  pull_request:
-    paths:
-      - '.github/workflows/build-binary-dists.yml'
-      - 'configs/**'
-      - 'scripts/**'
   workflow_call:
 
 permissions:
@@ -32,6 +27,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Use unstable branch when called via workflow_call (from nightly scheduler)
+          # Use current branch when triggered by PR (for testing)
+          ref: ${{ github.event_name == 'push' && github.ref || 'unstable' }}
 
       - name: Install build dependencies
         run: |
