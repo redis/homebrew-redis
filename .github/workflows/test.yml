@@ -1,4 +1,4 @@
-name: Test Redis Unstable CE Package
+name: Test Redis Unstable Package
 
 on:
   workflow_call:
@@ -14,7 +14,7 @@ on:
 
 jobs:
   test:
-    name: Test Redis CE
+    name: Test Redis
     runs-on: ${{ inputs.runner }}
     steps:
       - uses: actions/checkout@v4
@@ -30,28 +30,21 @@ jobs:
 
       - name: Install runtime dependencies
         run: |
-          # Extract runtime dependencies from cask file
-          DEPS=$(grep 'depends_on formula:' Casks/redis.rb | sed 's/.*depends_on formula: "\([^"]*\)".*/\1/' | tr '\n' ' ')
-          echo "Installing runtime dependencies from cask file: $DEPS"
-          brew install $DEPS
+          brew install libomp llvm@18
 
-      - name: Setup local cask for testing
+      - name: Setup local tap
         run: |
-          # Create temporary cask file that points to local artifact
-          ARTIFACT_FILE=$(ls unsigned-redis-ce-unstable-*.zip)
-          ARTIFACT_PATH="file://$(pwd)/$ARTIFACT_FILE"
-          
-          # Modify existing cask to point to local artifact
-          sed -i "" "s|https://packages.redis.io/homebrew/redis-ce-.*\.zip|$ARTIFACT_PATH|g" Casks/redis.rb
-          
-          # Remove sha256 validation since we're using local file
-          sed -i "" '/sha256 arm:/d' Casks/redis.rb
-          sed -i "" '/intel:/d' Casks/redis.rb
-          
-          # Add current directory as tap
           brew tap redis/redis-unstable .
 
-      - name: Install Redis CE via cask
+          ARTIFACT_FILE=$(ls unsigned-redis-oss-unstable-*.zip)
+          ARTIFACT_PATH="$(pwd)/$ARTIFACT_FILE"
+          TAP_PATH=$(brew --repository redis/redis-unstable)
+          CASK_FILE="$TAP_PATH/Casks/redis.rb"
+
+          sed -i "" "s|url \".*\"|url \"file://$ARTIFACT_PATH\"|" "$CASK_FILE"
+          sed -i "" '/sha256 arm:/,/intel:/d' "$CASK_FILE"
+
+      - name: Install Redis via cask
         run: |
           brew install --cask redis/redis-unstable/redis --debug --verbose
           ls -al $(brew --prefix)/etc/redis.conf
