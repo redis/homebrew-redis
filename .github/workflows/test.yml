@@ -1,4 +1,4 @@
-name: Test Redis Unstable CE Package
+name: Test Redis Unstable Package
 
 on:
   workflow_call:
@@ -14,7 +14,7 @@ on:
 
 jobs:
   test:
-    name: Test Redis CE
+    name: Test Redis
     runs-on: ${{ inputs.runner }}
     steps:
       - uses: actions/checkout@v4
@@ -38,20 +38,19 @@ jobs:
       - name: Setup local cask for testing
         run: |
           # Create temporary cask file that points to local artifact
-          ARTIFACT_FILE=$(ls unsigned-redis-ce-unstable-*.zip)
+          ARTIFACT_FILE=$(ls unsigned-redis-oss-unstable-*.zip)
           ARTIFACT_PATH="file://$(pwd)/$ARTIFACT_FILE"
           
           # Modify existing cask to point to local artifact
-          sed -i "" "s|https://packages.redis.io/homebrew/redis-ce-.*\.zip|$ARTIFACT_PATH|g" Casks/redis.rb
+          sed -i "" "s|url \"https://packages.redis.io/homebrew/redis-oss-.*\.zip\"|url \"$ARTIFACT_PATH\"|g" Casks/redis.rb
           
           # Remove sha256 validation since we're using local file
-          sed -i "" '/sha256 arm:/d' Casks/redis.rb
-          sed -i "" '/intel:/d' Casks/redis.rb
+          sed -i "" '/sha256 arm:/,/intel:/d' Casks/redis.rb
           
           # Add current directory as tap
           brew tap redis/redis-unstable .
 
-      - name: Install Redis CE via cask
+      - name: Install Redis via cask
         run: |
           brew install --cask redis/redis-unstable/redis --debug --verbose
           ls -al $(brew --prefix)/etc/redis.conf

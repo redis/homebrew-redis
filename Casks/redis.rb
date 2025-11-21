@@ -1,11 +1,11 @@
 cask "redis" do
   arch arm: "arm64", intel: "x86_64"
 
-  version "8.0.2"
-  sha256 arm: "a411848a56dadec7a8e24ef6b28caec9e8f454883a934564f4bfb2930187a41a",
-         intel: "45c941643a7863b64d8401e1eb3014e6e4128f2125ba73cf8654fb900b87061a"
+  version "8.4.0"
+  sha256 arm: "4279eabb6410f201cf8f268969374d4d95bf9f25c84cc6afbce305bae6ef06dd",
+         intel: "386df586757b7614ad87a603e1e56761a0ccf843386f31f45a9e187b837ef219"
 
-  url "https://packages.redis.io/homebrew/redis-ce-#{version}-#{arch}.zip"
+  url "https://packages.redis.io/homebrew/redis-oss-#{version}-#{arch}.zip"
   name "Redis Open Source"
   desc "Redis is an in-memory database that persists on disk. The data model is key-value, but many different kind of values are supported: Strings, Lists, Sets, Sorted Sets, Hashes, Streams, HyperLogLogs, Bitmaps."
   homepage "https://redis.io/"
@@ -15,8 +15,6 @@ cask "redis" do
   depends_on formula: "openssl@3"
   depends_on formula: "libomp"
   depends_on formula: "llvm@18"
-
-  conflicts_with formula: "redis-rc"
 
   binaries = %w[
     redis-cli
