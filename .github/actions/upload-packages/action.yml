@@ -81,8 +81,8 @@ runs:
           sha256=$(shasum -a 256 $dir/*.zip | awk '{print $1}')
 
           # Only copy if binary doesn't exist
-          if aws s3api head-object --bucket ${{ inputs.BREW_S3_BUCKET }} --key homebrew/$dir >/dev/null 2>&1;
-          then
+          if aws s3api head-object --bucket ${{ inputs.BREW_S3_BUCKET }} --key homebrew/$dir >/dev/null 2>&1 && \
+             [ "${{ inputs.release_type }}" = "public" ]; then
             echo "Error: Binary $dir already exists in S3. Public releases cannot overwrite existing packages."
             echo "Please check if this release has already been published."
             exit 1
