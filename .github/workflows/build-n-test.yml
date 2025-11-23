@@ -5,6 +5,8 @@ on:
     inputs:
       release_tag:
         type: string
+      channel:
+        type: string
 
 jobs:
   build-binary-package:
@@ -52,9 +54,7 @@ jobs:
           - macos-15        # macOS 15 arm64
           - macos-14-large  # macOS 14 x86_64
           - macos-14        # macOS 14 arm64
-        cask:
-          - redis
-          - redis-rc
+        cask: ${{ inputs.channel == 'stable' && fromJSON('["redis", "redis-rc"]') || fromJSON('["redis-rc"]') }}
     runs-on: ${{ matrix.os_version }}
     steps:
     - name: Checkout code
