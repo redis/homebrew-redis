@@ -81,12 +81,18 @@ runs:
           sha256=$(shasum -a 256 $dir/*.zip | awk '{print $1}')
 
           # Only copy if binary doesn't exist
-          aws s3api head-object --bucket ${{ inputs.BREW_S3_BUCKET }} --key homebrew/$dir >/dev/null 2>&1 || \
-          aws s3 cp $dir/*.zip s3://${{ inputs.BREW_S3_BUCKET }}/homebrew/ --acl public-read
+          if aws s3api head-object --bucket ${{ inputs.BREW_S3_BUCKET }} --key homebrew/$dir >/dev/null 2>&1;
+          then
+            echo "Error: Binary $dir already exists in S3. Public releases cannot overwrite existing packages."
+            echo "Please check if this release has already been published."
+            exit 1
+          else
+            aws s3 cp $dir/*.zip s3://${{ inputs.BREW_S3_BUCKET }}/homebrew/ --acl public-read
 
-          # Build json structure incrementally with arch and sha256
-          packages_sha256_json=$(echo "$packages_sha256_json" | jq --arg arch "$arch" --arg sha256 "$sha256" \
+            # Build json structure incrementally with arch and sha256
+            packages_sha256_json=$(echo "$packages_sha256_json" | jq --arg arch "$arch" --arg sha256 "$sha256" \
             '.[$arch] = {"sha256": $sha256}')
+          fi
       done
 
       packages_json=$(echo $packages_sha256_json| jq -r 'keys')
