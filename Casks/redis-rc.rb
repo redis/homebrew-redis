@@ -1,23 +1,21 @@
 cask "redis-rc" do
   arch arm: "arm64", intel: "x86_64"
 
-  version "8.2-rc1"
-  sha256 arm: "7c7926b82c80017245b6eccab77b7b010f8d537b6ba68e7ece07dfc36a7f744d",
-         intel: "3bffc2aaf82ce822a53039b068190d1780a3e3c0596c39ddd982293ce3b877e5"
+  version "8.4.0"
+  sha256 arm: "4279eabb6410f201cf8f268969374d4d95bf9f25c84cc6afbce305bae6ef06dd",
+         intel: "386df586757b7614ad87a603e1e56761a0ccf843386f31f45a9e187b837ef219"
 
-  url "https://packages.redis.io/homebrew/redis-ce-#{version}-#{arch}.zip"
-  name "Redis Community Edition - Pre-Release"
+  url "https://packages.redis.io/homebrew/redis-oss-#{version}-#{arch}.zip"
+  name "Redis Open Source - Pre-Release"
   desc "THIS IS A PRE-RELEASE VERSION!! BREAKING CHANGES MAY OCCUR WITHOUT NOTICE!! Redis is an in-memory database that persists on disk. The data model is key-value, but many different kind of values are supported: Strings, Lists, Sets, Sorted Sets, Hashes, Streams, HyperLogLogs, Bitmaps."
   homepage "https://redis.io/"
 
-  depends_on macos: ">= :ventura"
+  depends_on macos: ">= :sonoma"
 
   depends_on formula: "openssl@3"
   depends_on formula: "libomp"
   depends_on formula: "llvm@18"
   
-  conflicts_with formula: "redis"
-
   binaries = %w[
     redis-cli
     redis-benchmark

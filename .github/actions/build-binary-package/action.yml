@@ -1,4 +1,4 @@
-name: Build Redis CE MacOS Binary Distributions
+name: Build Redis MacOS Binary Distributions
 description: Binary build action
 
 inputs:
@@ -36,13 +36,6 @@ runs:
     shell: bash
     run: |
       scripts/build.sh ${{ inputs.redis_version }}
-      echo "UNSIGNED_REDIS_BINARY=unsigned-redis-ce-${{ inputs.redis_version }}-$(uname -m).zip" >> $GITHUB_OUTPUT
-  #check if upload for unstable
-#  - name: Upload Redis CE Binary Distribution
-#    uses: actions/upload-artifact@v4
-#    with:
-#      path: ./${{ steps.build.outputs.UNSIGNED_REDIS_BINARY }}
-#      name: ${{ steps.build.outputs.UNSIGNED_REDIS_BINARY }}
   - name: Setup Keychain and Certificate
     shell: bash
     run: |
@@ -81,13 +74,13 @@ runs:
         /usr/bin/codesign --keychain build.keychain --options=runtime --timestamp -v --sign "${CODESIGN_IDENTITY}" --entitlements configs/entitlements.xml -f build_dir/lib/redis/modules/$i
       done
       # Create distribution archive
-      (cd build_dir && zip -r ../redis-ce-${{ inputs.redis_version }}-$(uname -m).zip .)
-      echo "REDIS_BINARY=redis-ce-${{ inputs.redis_version }}-$(uname -m).zip" >> $GITHUB_OUTPUT
-  - name: Notarize Redis CE Binary Distribution
+      (cd build_dir && zip -r ../redis-oss-${{ inputs.redis_version }}-$(uname -m).zip .)
+      echo "REDIS_BINARY=redis-oss-${{ inputs.redis_version }}-$(uname -m).zip" >> $GITHUB_OUTPUT
+  - name: Notarize Redis Binary Distribution
     shell: bash
     run: |
       sh scripts/notarize.sh ${{ steps.sign.outputs.REDIS_BINARY }} com.redis.redis ${{ inputs.MAC_NOTARIZE_USERNAME }} ${{ inputs.MAC_NOTARIZE_PASSWORD }} ${{ inputs.MAC_NOTARIZE_TEAM_ID }}
-  - name: Upload Redis CE Binary Distribution
+  - name: Upload Redis Binary artifact
     uses: actions/upload-artifact@v4
     with:
       path: ./${{ steps.sign.outputs.REDIS_BINARY }}
