@@ -79,9 +79,12 @@ runs:
       for dir in redis-oss-*; do
           arch=$(echo $dir | sed -E 's/.*-([^-]+)\.zip$/\1/')
           sha256=$(shasum -a 256 $dir/*.zip | awk '{print $1}')
+
+          # Only copy if binary doesn't exist
+          aws s3api head-object --bucket ${{ inputs.BREW_S3_BUCKET }} --key homebrew/$dir >/dev/null 2>&1 || \
           aws s3 cp $dir/*.zip s3://${{ inputs.BREW_S3_BUCKET }}/homebrew/ --acl public-read
 
-          # build json structure incrementally with arch and sha256
+          # Build json structure incrementally with arch and sha256
           packages_sha256_json=$(echo "$packages_sha256_json" | jq --arg arch "$arch" --arg sha256 "$sha256" \
             '.[$arch] = {"sha256": $sha256}')
       done

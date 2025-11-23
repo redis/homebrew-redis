@@ -41,14 +41,6 @@ jobs:
           allow_modify: true
           gh_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Bump redis version
-        id: bump-version
-        uses: ./.github/actions/bump-redis-version
-        with:
-          release_tag: ${{ github.event.inputs.release_tag }}
-          release_version_branch: ${{ steps.ensure-branch.outputs.release_version_branch }}
-          release_type: ${{ github.event.inputs.release_type }}
-
   build-n-test:
     needs: prepare-release
     uses: ./.github/workflows/build-n-test.yml
@@ -87,6 +79,9 @@ jobs:
     runs-on: ubuntu-latest
     if: failure()
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Detect env name
         id: detect-env
         run: |

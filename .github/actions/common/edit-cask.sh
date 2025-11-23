@@ -12,6 +12,15 @@ TAG=""
 TAP="redis/redis"
 ACTION=""
 
+# Detect OS for sed compatibility
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS requires empty string for in-place editing
+    SED_INPLACE="sed -i ''"
+else
+    # Linux doesn't need the empty string
+    SED_INPLACE="sed -i"
+fi
+
 # Function to display usage
 usage() {
     echo "Usage: $0 --cask <cask_name> --action <action> [--binary <binary_path>] [--package-json <json>] [--tap <tap_name>] <TAG>"
@@ -53,9 +62,9 @@ edit_cask_file(){
         fi
 
         # Change url to file://
-        sed -i '' "s|url \".*\"|url \"file://$binary_path\"|" $casks_path
+        $SED_INPLACE "s|url \".*\"|url \"file://$binary_path\"|" $casks_path
         # Remove sha256 verification since it's testing
-        sed -i '' '/sha256 arm:/,/intel:.*"$/d' $casks_path
+        $SED_INPLACE '/sha256 arm:/,/intel:.*"$/d' $casks_path
 
     elif [ "$action" = "publish" ]; then
         casks_path="$(pwd)/Casks/${cask_name}.rb"
@@ -75,8 +84,8 @@ edit_cask_file(){
         # Update sha256 values in cask file
         if [ -n "$arm_sha" ] && [ -n "$intel_sha" ]; then
             # Replace existing sha256 line with new values
-            sed -i "s/sha256 arm: \"[^\"]*\",$/sha256 arm: \"$arm_sha\",/" $casks_path
-            sed -i "/sha256 arm:/,/intel:/ s/intel: \"[^\"]*\"/intel: \"$intel_sha\"/" "$casks_path"
+            $SED_INPLACE "s/sha256 arm: \"[^\"]*\",$/sha256 arm: \"$arm_sha\",/" $casks_path
+            $SED_INPLACE "/sha256 arm:/,/intel:/ s/intel: \"[^\"]*\"/intel: \"$intel_sha\"/" "$casks_path"
         else
             echo "Error: Missing sha256 values in package_json"
             exit 1
@@ -88,7 +97,7 @@ edit_cask_file(){
     fi
 
     # Change version
-    sed -i "s/version \"[^\"]*\"/version \"$tag\"/" $casks_path
+    $SED_INPLACE "s/version \"[^\"]*\"/version \"$tag\"/" $casks_path
 }
 
 # Parse command line arguments
