@@ -5,6 +5,8 @@ on:
     inputs:
       release_tag:
         type: string
+      channel:
+        type: string
 
 jobs:
   build-binary-package:
@@ -13,9 +15,11 @@ jobs:
       fail-fast: false
       matrix:
         os_version:         # See: https://github.com/actions/runner-images/blob/main/README.md#available-images
-          - macos-14-large        # macOS 14 x86_64
+          - macos-14-large  # macOS 14 x86_64
           - macos-14-xlarge # macOS 14 arm64
     runs-on: ${{ matrix.os_version }}
+    outputs:
+      redis_version: ${{ steps.set_version.outputs.redis_version }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -30,9 +34,13 @@ jobs:
         allow_modify: false
         release_branch: ${{ github.ref_name }}
         gh_token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Determine version
+      id: set_version
+      run:
+        echo "redis_version=$(jq -r '.ref' ./configs/redis_version.json)" >> $GITHUB_OUTPUT
     - uses: ./.github/actions/build-binary-package
       with:
-        redis_version: ${{ inputs.release_tag }}
+        redis_version: ${{ steps.set_version.outputs.redis_version }}
         MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
         MACOS_KEYCHAIN_PASSWORD: ${{ secrets.MACOS_KEYCHAIN_PASSWORD }}
         MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
@@ -52,9 +60,7 @@ jobs:
           - macos-15        # macOS 15 arm64
           - macos-14-large  # macOS 14 x86_64
           - macos-14        # macOS 14 arm64
-        cask:
-          - redis
-          - redis-rc
+        cask: ${{ inputs.channel == 'stable' && fromJSON('["redis", "redis-rc"]') || fromJSON('["redis-rc"]') }}
     runs-on: ${{ matrix.os_version }}
     steps:
     - name: Checkout code
@@ -63,6 +69,6 @@ jobs:
         ref: ${{ inputs.release_tag == 'unstable' && 'unstable' || '' }}
     - uses: ./.github/actions/test-redis-package
       with:
-        redis_version: ${{ inputs.release_tag }}
+        redis_version: ${{ needs.build-binary-package.outputs.redis_version }}
         cask: ${{ matrix.cask }}
         tap: ${{ vars.REDIS_TAP }}

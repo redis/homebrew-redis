@@ -13,6 +13,9 @@ on:
       release_type:
         description: 'Type of release to upload (public, internal)'
         required: true
+      channel:
+        description: 'Type of stability (stable, rc)'
+        required: false
 
 # UUID is used to help automation to identify workflow run in the list of workflow runs.
 run-name: "Release Build and Test${{ github.event.inputs.workflow_uuid && format(': {0}', github.event.inputs.workflow_uuid) || '' }}"
@@ -38,19 +41,19 @@ jobs:
           allow_modify: true
           gh_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Bump redis version
-        id: bump-version
-        uses: ./.github/actions/bump-redis-version
+      - name: Edit redis version file
+        id: edit-version
+        uses: ./.github/actions/edit-version-file
         with:
           release_tag: ${{ github.event.inputs.release_tag }}
           release_version_branch: ${{ steps.ensure-branch.outputs.release_version_branch }}
-          release_type: ${{ github.event.inputs.release_type }}
 
   build-n-test:
     needs: prepare-release
     uses: ./.github/workflows/build-n-test.yml
     with:
       release_tag: ${{ github.event.inputs.release_tag }}
+      channel: ${{ github.event.inputs.channel }}
     secrets: inherit
 
   create-release-handle:
@@ -83,6 +86,9 @@ jobs:
     runs-on: ubuntu-latest
     if: failure()
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Detect env name
         id: detect-env
         run: |
