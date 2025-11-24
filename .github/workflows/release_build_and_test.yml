@@ -41,6 +41,13 @@ jobs:
           allow_modify: true
           gh_token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Edit redis version file
+        id: edit-version
+        uses: ./.github/actions/edit-redis-version
+        with:
+          release_tag: ${{ github.event.inputs.release_tag }}
+          release_version_branch: ${{ steps.ensure-branch.outputs.release_version_branch }}
+
   build-n-test:
     needs: prepare-release
     uses: ./.github/workflows/build-n-test.yml
