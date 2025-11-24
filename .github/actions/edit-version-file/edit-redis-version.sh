@@ -1,24 +1,6 @@
 #!/bin/bash
 set -e
 
-# This script updates debian/version_file using the provided TAG
-# and commits changes if any were made.
-
-# shellcheck disable=SC2034
-last_cmd_stdout=""
-# shellcheck disable=SC2034
-last_cmd_stderr=""
-# shellcheck disable=SC2034
-last_cmd_result=0
-# shellcheck disable=SC2034
-VERBOSITY=1
-
-SCRIPT_DIR="$(dirname -- "$( readlink -f -- "$0"; )")"
-# shellcheck disable=SC1091
-. "$SCRIPT_DIR/../common/func.sh"
-
-source_helper_file helpers.sh
-
 # Input TAG is expected in $1
 TAG="$1"
 
