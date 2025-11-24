@@ -1,7 +1,7 @@
 cask "redis-rc" do
   arch arm: "arm64", intel: "x86_64"
 
-  version "8.4.0"
+  version "8.2.3"
   sha256 arm: "4279eabb6410f201cf8f268969374d4d95bf9f25c84cc6afbce305bae6ef06dd",
          intel: "386df586757b7614ad87a603e1e56761a0ccf843386f31f45a9e187b837ef219"
 
@@ -15,7 +15,7 @@ cask "redis-rc" do
   depends_on formula: "openssl@3"
   depends_on formula: "libomp"
   depends_on formula: "llvm@18"
-  
+
   binaries = %w[
     redis-cli
     redis-benchmark
@@ -24,7 +24,7 @@ cask "redis-rc" do
     redis-sentinel
     redis-server
   ]
-  
+
   postflight do
     basepath = HOMEBREW_PREFIX.to_s
     caskbase = "#{caskroom_path}/#{version}"
