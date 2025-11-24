@@ -43,7 +43,7 @@ jobs:
 
       - name: Edit redis version file
         id: edit-version
-        uses: ./.github/actions/edit-redis-version
+        uses: ./.github/actions/edit-version-file
         with:
           release_tag: ${{ github.event.inputs.release_tag }}
           release_version_branch: ${{ steps.ensure-branch.outputs.release_version_branch }}
