@@ -31,7 +31,7 @@ runs:
     shell: bash
     run: |
       scripts/install_deps.sh
-  - name: Build Redis CE
+  - name: Build Redis
     id: build
     shell: bash
     run: |

@@ -26,7 +26,7 @@ update_redis_version() {
     # Check if this version already exists in version_file
     if [ "$(jq -r '.ref' "$version_file")" = "$tag" ]; then
         echo "Version $tag already exists in $version_file, skipping"
-        return 1
+        return 0
     fi
 
     # Create temporary file with new entry
@@ -39,17 +39,12 @@ update_redis_version() {
     mv "$temp_version_file" "$version_file"
 
     echo "Successfully updated $version_file with version $tag"
-    return 0
 }
 
 version_file="configs/redis_version.json"
-# Track which files were modified
-changed_files=()
 
 # Update the version_file
-if update_redis_version "$version_file" "$TAG"; then
-    changed_files+=("$version_file_file")
-fi
+update_redis_version "$version_file" "$TAG"
 
 # Check what files actually changed in git
 mapfile -t changed_files < <(git diff --name-only "$version_file")

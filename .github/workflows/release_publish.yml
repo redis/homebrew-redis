@@ -42,10 +42,10 @@ jobs:
             exit 1
           fi
           if [ "${{ inputs.release_type }}" = "public" ]; then
-            url_prefix="https://packages.redis.io/homebrew"
+            url_prefix="{{ vars.PUBLIC_PACKAGES_URL }}"
             env_name="production"
           else
-            url_prefix="https://redis-test-package-repository.s3.us-east-2.amazonaws.com/homebrew"
+            url_prefix="{{ vars.STAGING_PACKAGES_URL }}"
             env_name="staging"
           fi
           echo "env_name=$env_name" >> $GITHUB_OUTPUT
