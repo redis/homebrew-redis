@@ -50,7 +50,7 @@ jobs:
 
 
   test:
-    name: Test Redis CE
+    name: Test Redis
     needs: build-binary-package
     strategy:
       fail-fast: false
