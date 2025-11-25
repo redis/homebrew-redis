@@ -1,0 +1,132 @@
+name: "Upload homebrew to S3"
+description: Upload binary homebrew packages to S3
+
+inputs:
+  run_id:
+    description: "Run ID to download artifacts from"
+    required: true
+  release_type:
+    description: "Type of release to upload (public, internal)"
+    required: true
+  release_tag:
+    description: 'Release tag to publish'
+    required: true
+  release_version_branch:
+    description: 'Release version changes'
+    required: true
+  gh_token:
+    description: "GitHub token"
+    required: true
+  BREW_S3_IAM_ARN:
+    description: "IAM ARN to assume for internal release"
+    required: false
+  BREW_S3_BUCKET:
+    description: "S3 bucket to upload to"
+    required: false
+  BREW_S3_REGION:
+    description: "S3 region to upload to"
+    required: false
+  channel:
+    description: 'Type of stability (stable, rc)'
+    required: true
+
+outputs:
+  packages_json:
+    description: "JSON structure of uploaded packages by distribution and architecture"
+    value: ${{ steps.upload-packages.outputs.packages_json }}
+
+runs:
+  using: "composite"
+  steps:
+  - name: Validate inputs
+    shell: bash
+    run: |
+      if [ "${{ inputs.release_type }}" != "public" ] && [ "${{ inputs.release_type }}" != "internal" ]; then
+        echo "Invalid release_type: ${{ inputs.release_type }}"
+        exit 1
+      fi
+      if [ "${{ inputs.channel }}" != "stable" ] && [ "${{ inputs.channel }}" != "rc" ]; then
+        echo "Invalid channel: ${{ inputs.channel }}"
+        exit 1
+      fi
+      if  [ -z "${{ inputs.BREW_S3_BUCKET }}" ] || [ -z "${{ inputs.BREW_S3_REGION }}" ] || [ -z "${{ inputs.BREW_S3_IAM_ARN }}" ]; then
+        echo "Missing required inputs for S3 bucket and region"
+        exit 1
+      fi
+      if [ -z "${{ inputs.run_id }}" ]; then
+        echo "Missing required inputs for run_id"
+        exit 1
+      fi
+      echo "Will download artifacts from workflow wth Run ID: ${{ inputs.run_id }}"
+
+  - name: Configure aws credentials
+    uses: aws-actions/configure-aws-credentials@v4.3.1
+    with:
+      role-to-assume: ${{ inputs.BREW_S3_IAM_ARN }}
+      aws-region: ${{ inputs.BREW_S3_REGION }}
+
+  - name: Get binary packages
+    uses: actions/download-artifact@v4
+    with:
+      run-id: ${{ inputs.run_id }}
+      github-token: ${{ inputs.gh_token }}
+
+  - name: Upload packages
+    id: upload-packages
+    shell: bash
+    run: |
+      packages_sha256_json='{}'
+      for dir in redis-oss-*; do
+          arch=$(echo $dir | sed -E 's/.*-([^-]+)\.zip$/\1/')
+          sha256=$(shasum -a 256 $dir/*.zip | awk '{print $1}')
+
+          # Only copy if binary doesn't exist
+          if aws s3api head-object --bucket ${{ inputs.BREW_S3_BUCKET }} --key homebrew/$dir >/dev/null 2>&1 && \
+             [ "${{ inputs.release_type }}" = "public" ]; then
+            echo "Error: Binary $dir already exists in S3. Public releases cannot overwrite existing packages."
+            echo "Please check if this release has already been published."
+            exit 1
+          else
+            aws s3 cp $dir/*.zip s3://${{ inputs.BREW_S3_BUCKET }}/homebrew/ --acl public-read
+
+            # Build json structure incrementally with arch and sha256
+            packages_sha256_json=$(echo "$packages_sha256_json" | jq --arg arch "$arch" --arg sha256 "$sha256" \
+            '.[$arch] = {"sha256": $sha256}')
+          fi
+      done
+
+      packages_json=$(echo $packages_sha256_json| jq -r 'keys')
+
+      echo "packages_sha256_json<<EOF" >> $GITHUB_ENV
+      echo "$packages_sha256_json" >> $GITHUB_ENV
+      echo "EOF" >> $GITHUB_ENV
+
+      echo "packages_json<<EOF" >> $GITHUB_OUTPUT
+      echo "$packages_json" >> $GITHUB_OUTPUT
+      echo "EOF" >> $GITHUB_OUTPUT
+
+  - name: Edit cask file
+    id: edit-cask-file
+    shell: bash
+    run: |
+      if [ "${{ inputs.channel }}" == "stable" ]; then
+        ${{ github.action_path }}/../common/edit-cask.sh --cask redis --action publish --package-json "$packages_sha256_json" ${{ inputs.release_tag }}
+      fi
+      ${{ github.action_path }}/../common/edit-cask.sh --cask redis-rc --action publish --package-json "$packages_sha256_json" ${{ inputs.release_tag }}
+      # Check what files actually changed in git
+      changed_files=$(git diff --name-only Casks/)
+      if [ -n "$changed_files" ]; then
+        echo "changed_files<<EOF" >> "$GITHUB_ENV"
+        echo "$changed_files" >> "$GITHUB_ENV"
+        echo "EOF" >> "$GITHUB_ENV"
+      else
+        echo "changed_files=" >> "$GITHUB_ENV"
+      fi
+
+  - name: Create verified commit
+    if: ${{ env.changed_files }} != ''
+    uses: iarekylew00t/verified-bot-commit@v1
+    with:
+      message: ${{ inputs.release_tag }}
+      files: ${{ env.changed_files }}
+      ref: ${{ inputs.release_version_branch }}

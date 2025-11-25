@@ -1,0 +1,125 @@
+name: Build Redis MacOS Binary Distributions
+description: Test binary action
+
+inputs:
+  redis_version:
+    description: 'Version to build'
+    required: true
+  cask:
+    description: 'Cask to test'
+    required: true
+  tap:
+    description: 'Tap to test'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+  - name: Detect artifact name
+    id: artifact_name
+    shell: bash
+    run: echo "ARTIFACT_NAME=redis-oss-${{ inputs.redis_version }}-$(uname -m).zip" >> "$GITHUB_ENV"
+  - name: Get binary packages
+    uses: actions/download-artifact@v4
+    with:
+      name: ${{ env.ARTIFACT_NAME }}
+  - name: Set up Homebrew
+    shell: bash
+    run: |
+      export HOMEBREW_GITHUB_API_TOKEN=$GITHUB_TOKEN
+      brew update
+      brew tap ${{ inputs.tap }} .
+  - name: Edit cask file
+    shell: bash
+    run: |
+      ${{ github.action_path }}/../common/edit-cask.sh --cask ${{ inputs.cask }} --action test --binary "$(pwd)/$ARTIFACT_NAME" --tap ${{ inputs.tap }} ${{ inputs.redis_version }}
+  - name: Install Redis
+    shell: bash
+    run: |
+      brew install --cask ${{ inputs.cask }} --debug --verbose || true
+      ls -al $(brew --prefix)/etc/redis.conf
+      ls -al $(brew --prefix)/lib/redis/modules
+      ls -al $(brew --prefix)/bin/redis*
+  - name: Test Redis Installation
+    shell: bash
+    run: |
+      redis-server --version
+      redis-server $(brew --prefix)/etc/redis.conf
+      for i in {1..30}; do redis-cli ping && break || echo "Waiting for Redis... $i" && sleep 1; done
+      redis-cli info server || { echo "Cannot get server info"; exit 1; }
+      redis-cli module list
+  - name: Verify Installed Modules
+    shell: bash
+    run: |
+      modules=$(redis-cli module list)
+      echo "Installed modules:"
+      echo "$modules"
+      missing_modules=()
+      for module in "bf" "search" "timeseries" "ReJSON"; do
+        if ! echo "$modules" | grep -q "$module"; then
+          missing_modules+=("$module")
+        fi
+      done
+      if [ ${#missing_modules[@]} -eq 0 ]; then
+        echo "All required modules are installed"
+      else
+        echo "The following modules are missing: ${missing_modules[*]}"
+        exit 1
+      fi
+  - name: Test RedisBloom
+    shell: bash
+    run: |
+      redis-cli BF.ADD popular_keys "redis:hash"
+      redis-cli BF.ADD popular_keys "redis:set"
+      [ "$(redis-cli BF.EXISTS popular_keys "redis:hash")" = "1" ] || \
+        { echo "RedisBloom test failed: 'redis:hash' not found"; exit 1; }
+      [ "$(redis-cli BF.EXISTS popular_keys "redis:list")" = "0" ] || \
+        { echo "RedisBloom test failed: 'redis:list' found unexpectedly"; exit 1; }
+      echo "RedisBloom test passed successfully"
+  - name: Test RediSearch
+    shell: bash
+    run: |
+      redis-cli FT.CREATE redis_commands ON HASH PREFIX 1 cmd: SCHEMA name TEXT SORTABLE description TEXT
+      redis-cli HSET cmd:set name "SET" description "Set the string value of a key"
+      redis-cli HSET cmd:get name "GET" description "Get the value of a key"
+      result=$(redis-cli FT.SEARCH redis_commands "value")
+      if echo "$result" | grep -q "Set the string value of a key" && \
+          echo "$result" | grep -q "Get the value of a key"; then
+        echo "RediSearch test passed successfully"
+      else
+        echo "RediSearch test failed: expected commands not found in search results"
+        exit 1
+      fi
+  - name: Test RedisTimeSeries
+    shell: bash
+    run: |
+      redis-cli TS.CREATE redis:cpu:usage RETENTION 86400
+      redis-cli TS.ADD redis:cpu:usage "*" 80
+      redis-cli TS.ADD redis:cpu:usage "*" 65
+      redis-cli TS.ADD redis:cpu:usage "*" 70
+      result=$(redis-cli TS.RANGE redis:cpu:usage - + COUNT 3)
+      if echo "$result" | grep -q "80" && \
+          echo "$result" | grep -q "65" && \
+          echo "$result" | grep -q "70"; then
+        echo "RedisTimeSeries test passed successfully"
+      else
+        echo "RedisTimeSeries test failed: expected values not found in time series"
+        exit 1
+      fi
+  - name: Test ReJSON
+    shell: bash
+    run: |
+      redis-cli JSON.SET redis:config $ '{"maxmemory":"2gb","maxmemory-policy":"allkeys-lru"}'
+      result=$(redis-cli JSON.GET redis:config $.maxmemory-policy)
+      cleaned_result=$(echo $result | tr -d '[]"')
+      if [ "$cleaned_result" = "allkeys-lru" ]; then
+        echo "ReJSON test passed successfully"
+      else
+        echo "ReJSON test failed: expected 'allkeys-lru', got $result"
+        exit 1
+      fi
+  - name: Test uninstall
+    shell: bash
+    run: |
+      brew uninstall ${{ inputs.cask }}
+      brew untap ${{ inputs.tap }}

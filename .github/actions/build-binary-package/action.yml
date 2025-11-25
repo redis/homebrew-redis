@@ -1,0 +1,87 @@
+name: Build Redis MacOS Binary Distributions
+description: Binary build action
+
+inputs:
+  redis_version:
+    description: 'Version to build'
+    required: true
+  MACOS_CERTIFICATE:
+    description: 'MacOS certificate'
+    required: true
+  MACOS_KEYCHAIN_PASSWORD:
+    description: 'MacOS keychain password'
+    required: true
+  MACOS_CERTIFICATE_PASSWORD:
+    description: 'MacOS certificate password'
+    required: true
+  MAC_NOTARIZE_USERNAME:
+    description: 'Mac notarize username'
+    required: true
+  MAC_NOTARIZE_PASSWORD:
+    description: 'Mac notarize password'
+    required: true
+  MAC_NOTARIZE_TEAM_ID:
+    description: 'Mac notarize team ID'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+  - name: Install build dependencies
+    shell: bash
+    run: |
+      scripts/install_deps.sh
+  - name: Build Redis
+    id: build
+    shell: bash
+    run: |
+      scripts/build.sh ${{ inputs.redis_version }}
+  - name: Setup Keychain and Certificate
+    shell: bash
+    run: |
+      # Decode and save certificate
+      echo "${{ inputs.MACOS_CERTIFICATE }}" | base64 --decode > certificate.p12
+      # Create and configure keychain
+      security create-keychain -p "${{ inputs.MACOS_KEYCHAIN_PASSWORD }}" build.keychain
+      security unlock-keychain -p "${{ inputs.MACOS_KEYCHAIN_PASSWORD }}" build.keychain
+      security set-keychain-settings -t 3600 -l build.keychain
+      # Add to search list and set as default
+      security list-keychains -d user -s build.keychain login.keychain
+      security default-keychain -s build.keychain
+      # Import and trust certificate
+      security import certificate.p12 -k build.keychain -P "${{ inputs.MACOS_CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
+      security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "${{ inputs.MACOS_KEYCHAIN_PASSWORD }}" build.keychain
+      # Debug certificate presence
+      security find-identity -v -p codesigning build.keychain
+  - name: Sign Binaries
+    id: sign
+    shell: bash
+    run: |
+      # Get identity from specific keychain
+      CODESIGN_IDENTITY=$(security find-identity -v -p codesigning build.keychain | grep -o '[0-9A-F]\{40\}' | head -n 1)
+      echo "Using identity: ${CODESIGN_IDENTITY}"
+      # Check if entitlements file exists
+      if [ ! -f configs/entitlements.xml ]; then
+        echo "Entitlements file not found!"
+        exit 1
+      fi
+      # Sign binaries with explicit keychain
+      for i in $(ls build_dir/bin); do
+        /usr/bin/codesign --keychain build.keychain --options=runtime --timestamp -v --sign "${CODESIGN_IDENTITY}" --entitlements configs/entitlements.xml -f build_dir/bin/$i
+      done
+      # Sign libraries with explicit keychain
+      for i in $(ls build_dir/lib/redis/modules); do
+        /usr/bin/codesign --keychain build.keychain --options=runtime --timestamp -v --sign "${CODESIGN_IDENTITY}" --entitlements configs/entitlements.xml -f build_dir/lib/redis/modules/$i
+      done
+      # Create distribution archive
+      (cd build_dir && zip -r ../redis-oss-${{ inputs.redis_version }}-$(uname -m).zip .)
+      echo "REDIS_BINARY=redis-oss-${{ inputs.redis_version }}-$(uname -m).zip" >> $GITHUB_OUTPUT
+  - name: Notarize Redis Binary Distribution
+    shell: bash
+    run: |
+      sh scripts/notarize.sh ${{ steps.sign.outputs.REDIS_BINARY }} com.redis.redis ${{ inputs.MAC_NOTARIZE_USERNAME }} ${{ inputs.MAC_NOTARIZE_PASSWORD }} ${{ inputs.MAC_NOTARIZE_TEAM_ID }}
+  - name: Upload Redis Binary artifact
+    uses: actions/upload-artifact@v4
+    with:
+      path: ./${{ steps.sign.outputs.REDIS_BINARY }}
+      name: ${{ steps.sign.outputs.REDIS_BINARY }}

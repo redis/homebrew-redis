@@ -1,0 +1,18 @@
+# This workflow runs on regular PR to main and can be dispatched
+name: Build and test Homebrew
+
+on:
+  pull_request:
+    branches:
+    - main
+  workflow_dispatch:
+
+run-name: ${{ format('Build on {0} to {1}', github.event_name, github.ref_name) }}
+
+jobs:
+  build-n-test:
+    uses: ./.github/workflows/build-n-test.yml
+    with:
+      release_tag: ''
+      channel: stable
+    secrets: inherit
