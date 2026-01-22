@@ -7,7 +7,7 @@ brew install make
 brew install llvm@18
 brew install gnu-sed
 brew install automake
-brew install libtool
+#brew install libtool
 
 brew uninstall --ignore-dependencies cmake 2>/dev/null || true
 rm -rf /Applications/CMake.app
