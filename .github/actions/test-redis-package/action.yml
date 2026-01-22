@@ -44,7 +44,7 @@ runs:
     shell: bash
     run: |
       redis-server --version
-      redis-server $(brew --prefix)/etc/redis.conf --log /tmp/redis-server.log
+      redis-server $(brew --prefix)/etc/redis.conf --logfile /tmp/redis-server.log
       for i in {1..30}; do redis-cli ping && break || echo "Waiting for Redis... $i" && sleep 1; done
       if ! redis-cli info server; then
         echo "Cannot get server info"
