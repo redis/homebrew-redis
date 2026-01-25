@@ -7,7 +7,7 @@ export BUILD_WITH_MODULES=yes
 export MODULE_VERSION=master
 export BUILD_TLS=yes
 export DISABLE_WERRORS=yes
-PATH="$HOMEBREW_PREFIX/opt/libtool/libexec/gnubin:$HOMEBREW_PREFIX/opt/llvm@18/bin:$HOMEBREW_PREFIX/opt/make/libexec/gnubin:$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin:$PATH" # Override macOS defaults.
+PATH="$HOMEBREW_PREFIX/opt/llvm@18/bin:$HOMEBREW_PREFIX/opt/make/libexec/gnubin:$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin:$PATH" # Override macOS defaults.
 export LDFLAGS="-L$HOMEBREW_PREFIX/opt/llvm@18/lib"
 export CPPFLAGS="-I$HOMEBREW_PREFIX/opt/llvm@18/include"
 
