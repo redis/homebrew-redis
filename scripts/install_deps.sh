@@ -9,6 +9,14 @@ brew install gnu-sed
 brew install automake
 brew install libtool
 
+echo $PATH
+which libtool
+find / -name libtool
+aclocal --print-ac-dir || :
+ACLOCAL_DIR=$(aclocal --print-ac-dir)
+find $ACLOCAL_DIR
+exit 1
+
 brew uninstall --ignore-dependencies cmake 2>/dev/null || true
 rm -rf /Applications/CMake.app
 rm -f /usr/local/bin/cmake /usr/local/bin/ctest /usr/local/bin/cpack /usr/local/bin/cmake-gui /usr/local/bin/ccmake
