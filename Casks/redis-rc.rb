@@ -1,9 +1,9 @@
 cask "redis-rc" do
   arch arm: "arm64", intel: "x86_64"
 
-  version "8.6.2"
-  sha256 arm: "536b335dc33ae94a46a1cec5a89704f1f0d18e6af34a3be6d2598a4783450f00",
-         intel: "c37061e3d428df895fd5753f13030cf5d770a9c0422e5dc6290bac8f2e2db1ad"
+  version "8.8-m03"
+  sha256 arm: "44eb97af035b89d0264531073be475c008fe39417988cb677544c97da4fadbf6",
+         intel: "8051071e8505cda5dbb8123c3f3a1e27602b747dc3e18fbd06ad0582386a55b7"
 
   url "https://packages.redis.io/homebrew/redis-oss-#{version}-#{arch}.zip"
   name "Redis Open Source - Pre-Release"
