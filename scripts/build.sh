@@ -7,9 +7,13 @@ export BUILD_WITH_MODULES=yes
 export MODULE_VERSION=master
 export BUILD_TLS=yes
 export DISABLE_WERRORS=yes
-PATH="$HOMEBREW_PREFIX/opt/llvm@18/bin:$HOMEBREW_PREFIX/opt/make/libexec/gnubin:$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin:$PATH" # Override macOS defaults.
-export LDFLAGS="-L$HOMEBREW_PREFIX/opt/llvm@18/lib"
-export CPPFLAGS="-I$HOMEBREW_PREFIX/opt/llvm@18/include"
+# RediSearch builds with LTO by default (redis/redis@2408a15) and its build.sh
+# enforces that clang's major version matches rustc's bundled LLVM. Rust 1.94
+# ships LLVM 21, so use llvm@21 here.
+export LTO=1
+PATH="$HOMEBREW_PREFIX/opt/llvm@21/bin:$HOMEBREW_PREFIX/opt/make/libexec/gnubin:$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin:$PATH" # Override macOS defaults.
+export LDFLAGS="-L$HOMEBREW_PREFIX/opt/llvm@21/lib"
+export CPPFLAGS="-I$HOMEBREW_PREFIX/opt/llvm@21/include"
 
 curl -L "https://github.com/redis/redis/archive/refs/heads/unstable.tar.gz" -o redis-unstable.tar.gz
 tar xzf redis-unstable.tar.gz
