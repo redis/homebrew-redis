@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 export HOMEBREW_NO_AUTO_UPDATE=1
 brew update
 brew install coreutils
@@ -9,9 +11,13 @@ brew install gnu-sed
 brew install automake
 brew install libtool
 
-brew uninstall --ignore-dependencies cmake 2>/dev/null || true
-rm -rf /Applications/CMake.app
-rm -f /usr/local/bin/cmake /usr/local/bin/ctest /usr/local/bin/cpack /usr/local/bin/cmake-gui /usr/local/bin/ccmake
+# Ensure Homebrew's cmake does not interfere
+brew uninstall --ignore-dependencies cmake || true
+
+# Clean up any stale CMake symlinks
+rm -f /usr/local/bin/cmake
+rm -f /usr/local/bin/ctest
+rm -f /usr/local/bin/cpack
 
 CMAKE_VERSION=3.31.6
 mkdir ~/Downloads/CMake
@@ -21,10 +27,6 @@ cp -R /Volumes/cmake-macos/CMake.app /Applications/
 hdiutil detach /Volumes/cmake-macos
 sudo "/Applications/CMake.app/Contents/bin/cmake-gui" --install=/usr/local/bin
 cmake --version
-
-export OPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@3
-echo "export OPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@3" >> ~/.profile
-[ -n "$GITHUB_ENV" ] && echo "OPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@3" >> $GITHUB_ENV
 
 RUST_INSTALLER=rust-1.80.1-$(if [ "$(uname -m)" = "arm64" ]; then echo "aarch64"; else echo "x86_64"; fi)-apple-darwin
 echo "Downloading and installing Rust standalone installer: ${RUST_INSTALLER}"
