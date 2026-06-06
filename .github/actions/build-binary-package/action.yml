@@ -81,7 +81,7 @@ runs:
     run: |
       sh scripts/notarize.sh ${{ steps.sign.outputs.REDIS_BINARY }} com.redis.redis ${{ inputs.MAC_NOTARIZE_USERNAME }} ${{ inputs.MAC_NOTARIZE_PASSWORD }} ${{ inputs.MAC_NOTARIZE_TEAM_ID }}
   - name: Upload Redis Binary artifact
-    uses: actions/upload-artifact@v4
+    uses: actions/upload-artifact@v7
     with:
       path: ./${{ steps.sign.outputs.REDIS_BINARY }}
       name: ${{ steps.sign.outputs.REDIS_BINARY }}

@@ -25,7 +25,7 @@ jobs:
     runs-on: ["ubuntu-latest"]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Validate Redis Release Archive
         uses: redis-developer/redis-oss-release-automation/.github/actions/validate-redis-release-archive@main
@@ -73,7 +73,7 @@ jobs:
           RELEASE_HANDLE
 
       - name: Upload release handle artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release_handle
           path: result.json
@@ -87,7 +87,7 @@ jobs:
     if: failure()
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Detect env name
         id: detect-env
