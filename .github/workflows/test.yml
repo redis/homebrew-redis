@@ -17,14 +17,14 @@ jobs:
     name: Test Redis
     runs-on: ${{ inputs.runner }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           # Use unstable branch when called via workflow_call (from nightly scheduler)
           # Use current branch when triggered by PR (for testing)
           ref: ${{ github.event_name == 'workflow_call' && 'unstable' || github.ref }}
 
       - name: Download built package
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: ${{ inputs.artifact_name }}
 
@@ -65,7 +65,7 @@ jobs:
 
       - name: Upload Redis logs
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: redis-logs-${{ inputs.runner }}
           path: /tmp/redis-logs/
