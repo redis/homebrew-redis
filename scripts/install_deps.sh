@@ -10,6 +10,7 @@ brew install llvm@18
 brew install gnu-sed
 brew install automake
 brew install libtool
+brew install uv
 
 # Ensure Homebrew's cmake does not interfere
 brew uninstall --ignore-dependencies cmake || true
