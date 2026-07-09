@@ -3,10 +3,7 @@
 set -e
 
 export HOMEBREW_PREFIX="$(brew --prefix)"
-export BUILD_WITH_MODULES=yes
-export MODULE_VERSION=master
 export BUILD_TLS=yes
-export DISABLE_WERRORS=yes
 # Override RediSearch's new LTO=1 default; toolchain support TBD.
 export LTO=0
 PATH="$HOMEBREW_PREFIX/opt/llvm@18/bin:$HOMEBREW_PREFIX/opt/make/libexec/gnubin:$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin:$PATH" # Override macOS defaults.
@@ -16,17 +13,14 @@ export CPPFLAGS="-I$HOMEBREW_PREFIX/opt/llvm@18/include"
 curl -L "https://github.com/redis/redis/archive/refs/heads/unstable.tar.gz" -o redis-unstable.tar.gz
 tar xzf redis-unstable.tar.gz
 
-# Update module versions to use master branch
-for module in redisbloom redisearch redistimeseries redisjson; do
-  if [ -f "redis-unstable/modules/${module}/Makefile" ]; then
-    sed -i 's/MODULE_VERSION = .*/MODULE_VERSION = master/' "redis-unstable/modules/${module}/Makefile"
-    echo "Updated MODULE_VERSION to master for ${module}"
-  fi
-done
+# Point every module at the master branch in the manifest.
+yq -i '.modules[].ref = "master"' redis-unstable/modules/modules.yaml
+
+# Clone the bundled modules (shallow) at the master refs set above.
+make -C redis-unstable modules-update MODULES_UPDATE_SHALLOW=1
 
 mkdir -p build_dir/etc
-make -C redis-unstable -j "$(nproc)" all OS=macos
-make -C redis-unstable install PREFIX=$(pwd)/build_dir OS=macos
+make -C redis-unstable -j "$(nproc)" deploy PREFIX=$(pwd)/build_dir
 cp ./configs/redis.conf build_dir/etc/redis.conf
 
 # Verify that all required modules were built and installed
