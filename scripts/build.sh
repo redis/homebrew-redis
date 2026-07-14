@@ -17,7 +17,7 @@ fi
 
 REDIS_VERSION="$1"
 
-curl -L "https://github.com/redis/redis/archive/refs/tags/$REDIS_VERSION.tar.gz" -o redis.tar.gz
+curl --fail -SsL -o redis.tar.gz "https://github.com/redis/redis/releases/download/$REDIS_VERSION/redis-full.tar.gz"
 tar xzf redis.tar.gz
 
 mkdir -p build_dir/etc
