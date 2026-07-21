@@ -10,7 +10,7 @@ cask "redis-rc" do
   desc "THIS IS A PRE-RELEASE VERSION!! BREAKING CHANGES MAY OCCUR WITHOUT NOTICE!! Redis is an in-memory database that persists on disk. The data model is key-value, but many different kind of values are supported: Strings, Lists, Sets, Sorted Sets, Hashes, Streams, HyperLogLogs, Bitmaps."
   homepage "https://redis.io/"
 
-  depends_on macos: ">= :ventura"
+  depends_on macos: :ventura
 
   depends_on formula: "openssl@3"
   depends_on formula: "libomp"
@@ -24,7 +24,7 @@ cask "redis-rc" do
     redis-sentinel
     redis-server
   ]
-  
+
   postflight do
     basepath = HOMEBREW_PREFIX.to_s
     caskbase = "#{caskroom_path}/#{version}"
