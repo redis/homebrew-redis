@@ -1,18 +1,8 @@
 name: Build Redis MacOS Unstable Package
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - '.github/workflows/build-binary-dists.yml'
-      - 'configs/**'
-      - 'scripts/**'
   pull_request:
     branches: [ unstable ]
-    paths:
-      - '.github/workflows/build-binary-dists.yml'
-      - 'configs/**'
-      - 'scripts/**'
   workflow_call:
 
 permissions:
