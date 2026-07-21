@@ -30,11 +30,14 @@ jobs:
 
       - name: Install runtime dependencies
         run: |
+          brew update
           brew install libomp llvm@18
 
       - name: Setup local tap
         run: |
           brew tap redis/redis-unstable .
+          # Homebrew 6.0.0+ refuses non-official taps unless trusted
+          brew trust redis/redis-unstable
 
           ARTIFACT_FILE=$(ls unsigned-redis-oss-unstable-*.zip)
           ARTIFACT_PATH="$(pwd)/$ARTIFACT_FILE"
