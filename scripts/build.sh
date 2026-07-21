@@ -17,8 +17,14 @@ fi
 
 REDIS_VERSION="$1"
 
-curl --fail -SsL -o redis.tar.gz "https://github.com/redis/redis/releases/download/$REDIS_VERSION/redis-full.tar.gz"
-tar xzf redis.tar.gz
+# Internal releases lack the redis-full archive, fall back to the tag source.
+if curl --fail -SsL -o redis.tar.gz "https://github.com/redis/redis/releases/download/$REDIS_VERSION/redis-full.tar.gz"; then
+  tar xzf redis.tar.gz
+else
+  curl --fail -SsL -o redis.tar.gz "https://github.com/redis/redis/archive/refs/tags/$REDIS_VERSION.tar.gz"
+  tar xzf redis.tar.gz
+  make -C redis-$REDIS_VERSION modules-update MODULES_UPDATE_SHALLOW=1
+fi
 
 mkdir -p build_dir/etc
 make -C redis-$REDIS_VERSION -j "$(nproc)" deploy PREFIX=$(pwd)/build_dir
