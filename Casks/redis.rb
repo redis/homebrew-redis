@@ -10,7 +10,7 @@ cask "redis" do
   desc "Redis is an in-memory database that persists on disk. The data model is key-value, but many different kind of values are supported: Strings, Lists, Sets, Sorted Sets, Hashes, Streams, HyperLogLogs, Bitmaps."
   homepage "https://redis.io/"
 
-  depends_on macos: ">= :sonoma"
+  depends_on macos: :sonoma
 
   depends_on formula: "openssl@3"
   depends_on formula: "libomp"
