@@ -4,6 +4,8 @@ To install the latest version of Redis Open Source using Homebrew Cask, please u
 
 ```bash
 brew tap redis/redis
+# brew trust is required on Homebrew 6.0+
+brew trust redis/redis
 brew install --cask redis
 ```
 
@@ -11,6 +13,8 @@ For pre-release versions, you can use the following command. Note that this will
 
 ```bash
 brew tap redis/redis
+# brew trust is required on Homebrew 6.0+
+brew trust redis/redis
 brew install --cask redis-rc
 ```
 
