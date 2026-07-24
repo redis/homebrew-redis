@@ -24,7 +24,9 @@ if curl --fail -SsL -o redis.tar.gz "https://github.com/redis/redis/releases/dow
 else
   curl --fail -SsL -o redis.tar.gz "https://github.com/redis/redis/archive/refs/tags/$REDIS_VERSION.tar.gz"
   tar xzf redis.tar.gz
-  make -C redis-$REDIS_VERSION modules-update MODULES_UPDATE_SHALLOW=1
+  if [ -f "redis-$REDIS_VERSION/modules/modules.yaml" ]; then
+    make -C redis-$REDIS_VERSION modules-update MODULES_UPDATE_SHALLOW=1
+  fi
 fi
 
 mkdir -p build_dir/etc
