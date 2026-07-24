@@ -3,6 +3,7 @@
 set -e
 
 export HOMEBREW_PREFIX="$(brew --prefix)"
+export BUILD_TLS=yes
 # Override RediSearch's new LTO=1 default; toolchain support TBD.
 export LTO=0
 PATH="$HOMEBREW_PREFIX/opt/llvm@18/bin:$HOMEBREW_PREFIX/opt/make/libexec/gnubin:$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin:$PATH" # Override macOS defaults.
@@ -27,7 +28,13 @@ else
 fi
 
 mkdir -p build_dir/etc
-make -C redis-$REDIS_VERSION -j "$(nproc)" deploy PREFIX=$(pwd)/build_dir
+if [ -f "redis-$REDIS_VERSION/modules/modules.yaml" ]; then
+  make -C redis-$REDIS_VERSION -j "$(nproc)" deploy PREFIX=$(pwd)/build_dir
+else
+  export BUILD_WITH_MODULES=yes
+  make -C redis-$REDIS_VERSION -j "$(nproc)" all OS=macos
+  make -C redis-$REDIS_VERSION install PREFIX=$(pwd)/build_dir OS=macos
+fi
 
 # Verify that all required modules were built and installed
 echo "Verifying Redis modules..."
