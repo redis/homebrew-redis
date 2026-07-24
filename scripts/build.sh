@@ -33,6 +33,7 @@ if [ -f "redis-$REDIS_VERSION/modules/modules.yaml" ]; then
 else
   export BUILD_WITH_MODULES=yes
   make -C redis-$REDIS_VERSION -j "$(nproc)" all OS=macos
+  make -C redis-$REDIS_VERSION install PREFIX=$(pwd)/build_dir OS=macos
 fi
 
 # Verify that all required modules were built and installed
