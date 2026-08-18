@@ -41,11 +41,15 @@ jobs:
 
           ARTIFACT_FILE=$(ls unsigned-redis-oss-unstable-*.zip)
           ARTIFACT_PATH="$(pwd)/$ARTIFACT_FILE"
+          ARTIFACT_SHA=$(shasum -a 256 "$ARTIFACT_PATH" | awk '{print $1}')
           TAP_PATH=$(brew --repository redis/redis-unstable)
           CASK_FILE="$TAP_PATH/Casks/redis.rb"
+          echo "Computed sha256 for $ARTIFACT_FILE: $ARTIFACT_SHA"
 
           sed -i "" "s|url \".*\"|url \"file://$ARTIFACT_PATH\"|" "$CASK_FILE"
-          sed -i "" '/sha256 arm:/,/intel:/d' "$CASK_FILE"
+
+          if [ "$(uname -m)" = "arm64" ]; then SHA_KEY=arm; else SHA_KEY=intel; fi
+          sed -i "" "/sha256 arm:/,/intel:/ s/$SHA_KEY: \"[^\"]*\"/$SHA_KEY: \"$ARTIFACT_SHA\"/" "$CASK_FILE"
 
       - name: Install Redis via cask
         run: |
