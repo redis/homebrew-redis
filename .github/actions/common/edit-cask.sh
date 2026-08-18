@@ -49,6 +49,8 @@ edit_cask_file(){
     tap=$4
     cask_name=$5
     casks_path=""
+    arm_sha=""
+    intel_sha=""
 
     if [ "$action" = "test" ]; then
         casks_path="$(brew --repository $tap)/Casks/${cask_name}.rb"
@@ -63,8 +65,10 @@ edit_cask_file(){
 
         # Change url to file://
         $SED_INPLACE "s|url \".*\"|url \"file://$binary_path\"|" $casks_path
-        # Remove sha256 verification since it's testing
-        $SED_INPLACE '/sha256 arm:/,/intel:.*"$/d' $casks_path
+
+        # The file:// url is a single arch-specific zip, so both arches get its sha256
+        arm_sha=$(shasum -a 256 "$binary_path" | awk '{print $1}')
+        intel_sha="$arm_sha"
 
     elif [ "$action" = "publish" ]; then
         casks_path="$(pwd)/Casks/${cask_name}.rb"
@@ -81,20 +85,20 @@ edit_cask_file(){
         arm_sha=$(echo "$package_json" | jq -r '.arm64.sha256 // empty')
         intel_sha=$(echo "$package_json" | jq -r '.x86_64.sha256 // empty')
 
-        # Update sha256 values in cask file
-        if [ -n "$arm_sha" ] && [ -n "$intel_sha" ]; then
-            # Replace existing sha256 line with new values
-            $SED_INPLACE "s/sha256 arm: \"[^\"]*\",$/sha256 arm: \"$arm_sha\",/" $casks_path
-            $SED_INPLACE "/sha256 arm:/,/intel:/ s/intel: \"[^\"]*\"/intel: \"$intel_sha\"/" "$casks_path"
-        else
-            echo "Error: Missing sha256 values in package_json"
-            exit 1
-        fi
-
     else
         echo "Error: Invalid action '$action' in edit_cask_file"
         exit 1
     fi
+
+    # Update sha256 values in cask file. Homebrew 6.0.18+ refuses to install a cask
+    # with no sha256 for the running platform, so both actions must set them.
+    if [ -z "$arm_sha" ] || [ -z "$intel_sha" ]; then
+        echo "Error: Missing sha256 values for action '$action'"
+        exit 1
+    fi
+    # Replace existing sha256 line with new values
+    $SED_INPLACE "s/sha256 arm: \"[^\"]*\",$/sha256 arm: \"$arm_sha\",/" $casks_path
+    $SED_INPLACE "/sha256 arm:/,/intel:/ s/intel: \"[^\"]*\"/intel: \"$intel_sha\"/" "$casks_path"
 
     # Change version
     $SED_INPLACE "s/version \"[^\"]*\"/version \"$tag\"/" $casks_path
