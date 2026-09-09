@@ -35,9 +35,10 @@ jobs:
 
       - name: Setup local tap
         run: |
+          # brew trust can't trust a tap cloned from a local path, so skip the check
+          echo "HOMEBREW_NO_REQUIRE_TAP_TRUST=1" >> "$GITHUB_ENV"
+          export HOMEBREW_NO_REQUIRE_TAP_TRUST=1
           brew tap redis/redis-unstable .
-          # Homebrew 6.0.0+ refuses non-official taps unless trusted
-          brew trust redis/redis-unstable
 
           ARTIFACT_FILE=$(ls unsigned-redis-oss-unstable-*.zip)
           ARTIFACT_PATH="$(pwd)/$ARTIFACT_FILE"
