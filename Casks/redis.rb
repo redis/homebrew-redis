@@ -26,13 +26,8 @@ cask "redis" do
   ]
 
   postflight_steps do
-    basepath = HOMEBREW_PREFIX.to_s
-    caskbase = "#{caskroom_path}/#{version}"
-    confdir = "#{basepath}/etc"
-    moduledir = "#{basepath}/lib/redis/modules"
-
-    FileUtils.mkdir_p(confdir)
-    FileUtils.mkdir_p(moduledir)
+    mkdir_p "{{HOMEBREW_PREFIX}}/etc" 
+    mkdir_p "{{HOMEBREW_PREFIX}}/lib/redis/modules"
 
     # Replace <HOMEBREW_PREFIX> with the actual value
     src = "#{caskbase}/etc/redis.conf"
@@ -41,13 +36,9 @@ cask "redis" do
     text = File.read(conffile)
     new_contents = text.gsub("<HOMEBREW_PREFIX>", basepath)
     File.open(conffile, "w") { |file| file.puts new_contents }
-
+    
     # link binaries
-    binaries.each do |item|
-      src = "#{caskbase}/bin/#{item}"
-      dest = "#{basepath}/bin/#{item}"
-      FileUtils.ln_sf(src, dest)
-    end
+    symlinks_children "{{caskbase}}/bin/", "{{basepath}}/bin/"
 
     # link modules
     Dir["#{caskbase}/lib/redis/modules/*.so"].each do |item|
