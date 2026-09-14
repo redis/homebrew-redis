@@ -25,7 +25,7 @@ cask "redis" do
     redis-server
   ]
 
-  postflight do
+  postflight_steps do
     basepath = HOMEBREW_PREFIX.to_s
     caskbase = "#{caskroom_path}/#{version}"
     confdir = "#{basepath}/etc"
@@ -57,7 +57,7 @@ cask "redis" do
     end
   end
 
-  uninstall_postflight do
+  uninstall_postflight_steps do
     basepath = HOMEBREW_PREFIX.to_s
 
     # Remove binary symlinks
