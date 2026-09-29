@@ -13,10 +13,15 @@ export CPPFLAGS="-I$HOMEBREW_PREFIX/opt/llvm@18/include"
 curl -L "https://github.com/redis/redis/archive/refs/heads/unstable.tar.gz" -o redis-unstable.tar.gz
 tar xzf redis-unstable.tar.gz
 
-# Point every module at the master branch in the manifest.
-yq -i '.modules[].ref = "master"' redis-unstable/modules/modules.yaml
+# Point every module at the master branch in the manifest, then use the
+# RedisTimeSeries fork containing the macOS OpenSSL dependency fix.
+yq -i '
+  .modules[].ref = "master" |
+  (.modules[] | select(.name == "redistimeseries")).repo = "https://github.com/Peter-Sh/RedisTimeSeries" |
+  (.modules[] | select(.name == "redistimeseries")).ref = "Peter-Sh-fix-openssl-dep-mac-RED-218248"
+' redis-unstable/modules/modules.yaml
 
-# Clone the bundled modules (shallow) at the master refs set above.
+# Clone the bundled modules (shallow) at the refs configured above.
 make -C redis-unstable modules-update MODULES_UPDATE_SHALLOW=1
 
 mkdir -p build_dir/etc
