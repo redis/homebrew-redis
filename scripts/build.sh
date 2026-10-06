@@ -18,8 +18,8 @@ fi
 
 REDIS_VERSION="$1"
 
-# Internal releases lack the redis-full archive, fall back to the tag source.
-if curl --fail -SsL -o redis.tar.gz "https://github.com/redis/redis/releases/download/$REDIS_VERSION/redis-full.tar.gz"; then
+# Internal releases lack the redis-<version> release archive, fall back to the tag source.
+if curl --fail -SsL -o redis.tar.gz "https://github.com/redis/redis/releases/download/$REDIS_VERSION/redis-$REDIS_VERSION.tar.gz"; then
   tar xzf redis.tar.gz
 else
   curl --fail -SsL -o redis.tar.gz "https://github.com/redis/redis/archive/refs/tags/$REDIS_VERSION.tar.gz"
