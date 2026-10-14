@@ -14,6 +14,7 @@ export CPPFLAGS="-I$HOMEBREW_PREFIX/opt/llvm@18/include"
 # unversioned $HOMEBREW_PREFIX/opt/openssl, which may point at openssl@4.
 export OPENSSL_PREFIX="$HOMEBREW_PREFIX/opt/openssl@3"
 export OPENSSL_ROOT_DIR="$OPENSSL_PREFIX" # CMake-based modules
+export openssl_prefix="$OPENSSL_PREFIX" # RedisTimeSeries
 export PKG_CONFIG_PATH="$OPENSSL_PREFIX/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
 
 # Check if Redis version is provided as an argument
