@@ -7,6 +7,7 @@ brew update
 brew install coreutils
 brew install make
 brew install llvm@18
+brew install openssl@4
 brew install gnu-sed
 brew install automake
 brew install libtool

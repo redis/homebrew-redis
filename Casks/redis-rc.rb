@@ -12,7 +12,7 @@ cask "redis-rc" do
 
   depends_on macos: :ventura
 
-  depends_on formula: "openssl@3"
+  depends_on formula: "openssl@4"
   depends_on formula: "libomp"
   depends_on formula: "llvm@18"
 
