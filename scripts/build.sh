@@ -10,6 +10,13 @@ PATH="$HOMEBREW_PREFIX/opt/llvm@18/bin:$HOMEBREW_PREFIX/opt/make/libexec/gnubin:
 export LDFLAGS="-L$HOMEBREW_PREFIX/opt/llvm@18/lib"
 export CPPFLAGS="-I$HOMEBREW_PREFIX/opt/llvm@18/include"
 
+# Pin OpenSSL to the version the cask depends on, instead of the unversioned
+# $HOMEBREW_PREFIX/opt/openssl alias that Redis and the modules default to.
+export OPENSSL_PREFIX="$HOMEBREW_PREFIX/opt/openssl@4"
+export OPENSSL_ROOT_DIR="$OPENSSL_PREFIX" # CMake-based modules
+export openssl_prefix="$OPENSSL_PREFIX" # RedisTimeSeries
+export PKG_CONFIG_PATH="$OPENSSL_PREFIX/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+
 curl -L "https://github.com/redis/redis/archive/refs/heads/unstable.tar.gz" -o redis-unstable.tar.gz
 tar xzf redis-unstable.tar.gz
 
@@ -44,6 +51,15 @@ if [ -n "$MISSING_MODULES" ]; then
   echo "Expected modules in: $MODULES_DIR"
   echo "Contents of $MODULES_DIR:"
   ls -la "$MODULES_DIR" 2>/dev/null || echo "Directory does not exist"
+  exit 1
+fi
+
+# Fail if anything links against an OpenSSL other than openssl@4 (the cask dependency)
+echo "Verifying OpenSSL linkage..."
+BAD_LINKS=$(for f in build_dir/bin/* "$MODULES_DIR"/*.so; do otool -L "$f" | sed "s|^|$f:|"; done | grep -E '/opt/openssl(@[0-9]+)?/' | grep -v '/opt/openssl@4/' || true)
+if [ -n "$BAD_LINKS" ]; then
+  echo "ERROR: Binaries linked against an unexpected OpenSSL:"
+  echo "$BAD_LINKS"
   exit 1
 fi
 
