@@ -1,0 +1,9 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: unstable
+    schedule:
+      interval: weekly
+    allow:
+      - dependency-name: tracebit-com/tracebit-community-action

@@ -1,3 +1,5 @@
+[![Protected by Tracebit Community Edition](.github/assets/tracebit-badge.svg)](https://community.tracebit.com/supplychainattacks)
+
 ## Redis Open Source - Install using Homebrew Cask
 
 To install the latest version of Redis Open Source using Homebrew Cask, please use the following command:
