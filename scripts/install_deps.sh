@@ -11,6 +11,8 @@ brew install gnu-sed
 brew install automake
 brew install libtool
 brew install yq
+brew install zstd
+brew install pkgconf
 
 # Ensure Homebrew's cmake does not interfere
 brew uninstall --ignore-dependencies cmake || true
