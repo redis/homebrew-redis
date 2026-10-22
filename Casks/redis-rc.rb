@@ -24,59 +24,25 @@ cask "redis-rc" do
     redis-sentinel
     redis-server
   ]
-  
-  postflight do
-    basepath = HOMEBREW_PREFIX.to_s
-    caskbase = "#{caskroom_path}/#{version}"
-    confdir = "#{basepath}/etc"
-    moduledir = "#{basepath}/lib/redis/modules"
 
-    FileUtils.mkdir_p(confdir)
-    FileUtils.mkdir_p(moduledir)
+  postflight_steps do
+    mkdir_p "{{HOMEBREW_PREFIX}}/etc"
+    mkdir_p "{{HOMEBREW_PREFIX}}/lib/redis/modules"
 
-    # Replace <HOMEBREW_PREFIX> with the actual value
-    src = "#{caskbase}/etc/redis.conf"
-    conffile = "#{confdir}/redis.conf"
-    FileUtils.cp(src, conffile) unless File.exist?(conffile)
-    text = File.read(conffile)
-    new_contents = text.gsub("<HOMEBREW_PREFIX>", basepath)
-    File.open(conffile, "w") { |file| file.puts new_contents }
+    unless_path_exists "{{HOMEBREW_PREFIX}}/etc/redis.conf" do
+      copy "{{caskbase}}/etc/redis.conf", "{{HOMEBREW_PREFIX}}/etc/redis.conf", overwrite: false
+    end
 
     # link binaries
-    binaries.each do |item|
-      src = "#{caskbase}/bin/#{item}"
-      dest = "#{basepath}/bin/#{item}"
-      FileUtils.ln_sf(src, dest)
-    end
+    symlink_children "{{caskbase}}/bin/", "{{HOMEBREW_PREFIX}}/bin/", remove_on_uninstall: true
 
     # link modules
-    Dir["#{caskbase}/lib/redis/modules/*.so"].each do |item|
-      module_name = File.basename(item)
-      dest = "#{moduledir}/#{module_name}"
-      File.symlink(item, dest) unless File.exist?(dest)
-    end
+    symlink_children "{{caskbase}}/lib/redis/modules/*.so", "{{HOMEBREW_PREFIX}}/lib/redis/modules", remove_on_uninstall: true
   end
 
-  uninstall_postflight do
-    basepath = HOMEBREW_PREFIX.to_s
+  uninstall_postflight_steps do
 
-    # Remove binary symlinks
-    binaries.each do |item|
-      dest = "#{basepath}/bin/#{item}"
-      File.delete(dest) if File.symlink?(dest) && File.exist?(dest)
-    end
-
-    # Remove module symlinks
-    moduledir = "#{basepath}/lib/redis/modules"
-    Dir["#{moduledir}/*.so"].each do |item|
-      module_name = File.basename(item)
-      dest = "#{moduledir}/#{module_name}"
-      File.delete(dest)
-    end
-
-    # Clean up empty directories
-    FileUtils.rm_rf(moduledir) if Dir.empty?(moduledir)
-    FileUtils.rm_rf("#{basepath}/lib/redis") if Dir.empty?("#{basepath}/lib/redis")
+    remove "{{HOMEBREW_PREFIX}}/lib/redis/"
   end
 
   caveats <<~EOS
