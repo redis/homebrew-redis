@@ -71,6 +71,15 @@ jobs:
           mkdir -p /tmp/redis-logs
           cp redis-server.log /tmp/redis-logs/ 2>/dev/null || echo "No Redis logs to save"
 
+      - name: Verify replication compression support
+        run: |
+          otool -L "$(brew --prefix)/bin/redis-server" | grep libzstd || \
+            { echo "Compression test failed: redis-server is not linked against libzstd"; exit 1; }
+          # repl-compression only exists when built with BUILD_COMPRESSION=yes.
+          [ "$(redis-cli CONFIG GET repl-compression | head -1)" = "repl-compression" ] || \
+            { echo "Compression test failed: repl-compression config missing (built without BUILD_COMPRESSION?)"; exit 1; }
+          echo "Replication compression is supported"
+
       - name: Upload Redis logs
         if: failure()
         uses: actions/upload-artifact@v7

@@ -15,6 +15,7 @@ cask "redis-rc" do
   depends_on formula: "openssl@3"
   depends_on formula: "libomp"
   depends_on formula: "llvm@18"
+  depends_on formula: "zstd"
 
   binaries = %w[
     redis-cli

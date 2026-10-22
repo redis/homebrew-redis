@@ -4,6 +4,7 @@ set -e
 
 export HOMEBREW_PREFIX="$(brew --prefix)"
 export BUILD_TLS=yes
+export BUILD_COMPRESSION=yes
 # Override RediSearch's new LTO=1 default; toolchain support TBD.
 export LTO=0
 PATH="$HOMEBREW_PREFIX/opt/llvm@18/bin:$HOMEBREW_PREFIX/opt/make/libexec/gnubin:$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin:$PATH" # Override macOS defaults.
