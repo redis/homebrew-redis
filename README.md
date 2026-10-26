@@ -48,7 +48,7 @@ Redis officially tests the latest version of this distribution against the follo
 - macOS 26 (Tahoe)
 - macOS 15 (Sequoia)
 
-macOS 14 (Sonoma) is no longer supported, since Homebrew no longer provides bottles for it.
+The cask supports Apple Silicon (arm64) only. macOS 14 (Sonoma) and Intel Macs are no longer supported, since Homebrew no longer provides bottles for them.
 
 ## Starting Redis
 

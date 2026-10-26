@@ -1,15 +1,13 @@
 cask "redis" do
-  arch arm: "arm64", intel: "x86_64"
-
   version "8.10.2"
-  sha256 arm: "58023ce2a4c7a5c2b1e2f46c443c4ac160b207fe11d5e4f846ab995ca392e436",
-         intel: "08334ca85583bc81323be65d22455b0d36d21c3e149c588c911f80284cd8c6b4"
+  sha256 "58023ce2a4c7a5c2b1e2f46c443c4ac160b207fe11d5e4f846ab995ca392e436"
 
-  url "https://packages.redis.io/homebrew/redis-oss-#{version}-#{arch}.zip"
+  url "https://packages.redis.io/homebrew/redis-oss-#{version}-arm64.zip"
   name "Redis Open Source"
   desc "Redis is an in-memory database that persists on disk. The data model is key-value, but many different kind of values are supported: Strings, Lists, Sets, Sorted Sets, Hashes, Streams, HyperLogLogs, Bitmaps."
   homepage "https://redis.io/"
 
+  depends_on arch: :arm64
   depends_on macos: :sequoia
 
   depends_on formula: "openssl@3"
