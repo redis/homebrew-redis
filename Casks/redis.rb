@@ -1,16 +1,14 @@
 cask "redis" do
-  arch arm: "arm64", intel: "x86_64"
-
   version "8.10.2"
-  sha256 arm: "58023ce2a4c7a5c2b1e2f46c443c4ac160b207fe11d5e4f846ab995ca392e436",
-         intel: "08334ca85583bc81323be65d22455b0d36d21c3e149c588c911f80284cd8c6b4"
+  sha256 "58023ce2a4c7a5c2b1e2f46c443c4ac160b207fe11d5e4f846ab995ca392e436"
 
-  url "https://packages.redis.io/homebrew/redis-oss-#{version}-#{arch}.zip"
+  url "https://packages.redis.io/homebrew/redis-oss-#{version}-arm64.zip"
   name "Redis Open Source"
   desc "Redis is an in-memory database that persists on disk. The data model is key-value, but many different kind of values are supported: Strings, Lists, Sets, Sorted Sets, Hashes, Streams, HyperLogLogs, Bitmaps."
   homepage "https://redis.io/"
 
-  depends_on macos: :sonoma
+  depends_on arch: :arm64
+  depends_on macos: :sequoia
 
   depends_on formula: "openssl@3"
   depends_on formula: "libomp"
@@ -80,6 +78,12 @@ cask "redis" do
   end
 
   caveats <<~EOS
+    The official homebrew-core redis formula now ships Redis Open Source with its
+    modules, and is the recommended way to install Redis. To switch to it, run:
+      brew uninstall --cask redis
+      brew install redis
+    See https://redis.io/docs/latest/operate/oss_and_stack/install/install-stack/homebrew/
+
     Redis Open Source has been successfully installed!
 
     The default configuration file has been copied to:
