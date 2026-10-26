@@ -10,7 +10,7 @@ cask "redis" do
   desc "Redis is an in-memory database that persists on disk. The data model is key-value, but many different kind of values are supported: Strings, Lists, Sets, Sorted Sets, Hashes, Streams, HyperLogLogs, Bitmaps."
   homepage "https://redis.io/"
 
-  depends_on macos: :sonoma
+  depends_on macos: :sequoia
 
   depends_on formula: "openssl@3"
   depends_on formula: "libomp"
@@ -80,6 +80,12 @@ cask "redis" do
   end
 
   caveats <<~EOS
+    The official homebrew-core redis formula now ships Redis Open Source with its
+    modules, and is the recommended way to install Redis. To switch to it, run:
+      brew uninstall --cask redis
+      brew install redis
+    See https://redis.io/docs/latest/operate/oss_and_stack/install/install-stack/homebrew/
+
     Redis Open Source has been successfully installed!
 
     The default configuration file has been copied to:

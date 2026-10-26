@@ -1,8 +1,25 @@
 [![Protected by Tracebit Community Edition](.github/assets/tracebit-badge.svg)](https://community.tracebit.com/supplychainattacks)
 
+## Recommended: Install using the Homebrew Core Formula
+
+The `redis` formula in homebrew-core now ships Redis Open Source with its modules (Redis Query Engine, JSON, Probabilistic, Time Series), so it is the recommended way to install Redis on macOS:
+
+```bash
+brew install redis
+```
+
+See the [Redis installation docs for Homebrew](https://redis.io/docs/latest/operate/oss_and_stack/install/install-stack/homebrew/) for details.
+
 ## Redis Open Source - Install using Homebrew Cask
 
-To install the latest version of Redis Open Source using Homebrew Cask, please use the following command:
+This cask was created to ship Redis Open Source with its modules on macOS. The official homebrew-core `redis` formula now supports this, so we recommend installing it with `brew install redis` instead. If you already use the cask, switch to the formula with:
+
+```bash
+brew uninstall --cask redis
+brew install redis
+```
+
+To install Redis Open Source using Homebrew Cask, use the following command:
 
 ```bash
 brew tap redis/redis
@@ -28,9 +45,10 @@ To avoid potential conflicts or unexpected behavior, ensure you remove any lefto
 
 Redis officially tests the latest version of this distribution against the following OSes:
 
+- macOS 26 (Tahoe)
 - macOS 15 (Sequoia)
-- macOS 14 (Sonoma)
-- macOS 13 (Ventura)
+
+macOS 14 (Sonoma) is no longer supported, since Homebrew no longer provides bottles for it.
 
 ## Starting Redis
 
