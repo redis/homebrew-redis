@@ -49,8 +49,7 @@ jobs:
 
           sed -i "" "s|url \".*\"|url \"file://$ARTIFACT_PATH\"|" "$CASK_FILE"
 
-          if [ "$(uname -m)" = "arm64" ]; then SHA_KEY=arm; else SHA_KEY=intel; fi
-          sed -i "" "/sha256 arm:/,/intel:/ s/$SHA_KEY: \"[^\"]*\"/$SHA_KEY: \"$ARTIFACT_SHA\"/" "$CASK_FILE"
+          sed -i "" "s/^  sha256 \"[^\"]*\"$/  sha256 \"$ARTIFACT_SHA\"/" "$CASK_FILE"
 
       - name: Install Redis via cask
         run: |
