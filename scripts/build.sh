@@ -6,8 +6,8 @@ export HOMEBREW_PREFIX="$(brew --prefix)"
 export BUILD_TLS=yes
 # Override RediSearch's new LTO=1 default; toolchain support TBD.
 export LTO=0
-# Build with Apple clang; only GNU make/sed/coreutils override macOS defaults.
-PATH="$HOMEBREW_PREFIX/opt/make/libexec/gnubin:$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin:$PATH"
+# Homebrew llvm (build-only) satisfies RediSearch's macOS clang check and has std::atomic_ref.
+PATH="$HOMEBREW_PREFIX/opt/llvm/bin:$HOMEBREW_PREFIX/opt/make/libexec/gnubin:$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin:$PATH"
 
 curl -L "https://github.com/redis/redis/archive/refs/heads/unstable.tar.gz" -o redis-unstable.tar.gz
 tar xzf redis-unstable.tar.gz
