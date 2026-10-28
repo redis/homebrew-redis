@@ -31,7 +31,7 @@ jobs:
       - name: Install runtime dependencies
         run: |
           brew update
-          brew install libomp llvm@18
+          brew install libomp
 
       - name: Setup local tap
         run: |
