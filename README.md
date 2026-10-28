@@ -22,9 +22,10 @@ To avoid potential conflicts or unexpected behavior, ensure you remove any lefto
 
 Redis officially tests the latest version of this distribution against the following OSes:
 
+- macOS 26 (Tahoe)
 - macOS 15 (Sequoia)
-- macOS 14 (Sonoma)
-- macOS 13 (Ventura)
+
+The cask supports Apple Silicon (arm64) only. macOS 14 (Sonoma) and Intel Macs are no longer supported, since Homebrew no longer provides bottles for them.
 
 ## Starting Redis
 
