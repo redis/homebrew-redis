@@ -6,8 +6,8 @@ export HOMEBREW_PREFIX="$(brew --prefix)"
 export BUILD_TLS=yes
 # Override RediSearch's new LTO=1 default; toolchain support TBD.
 export LTO=0
-# Homebrew llvm (build-only) satisfies RediSearch's macOS clang check and has std::atomic_ref.
-PATH="$HOMEBREW_PREFIX/opt/llvm/bin:$HOMEBREW_PREFIX/opt/make/libexec/gnubin:$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin:$PATH"
+# Build with Apple clang, like the homebrew-core formula; GNU tools override macOS defaults.
+PATH="$HOMEBREW_PREFIX/opt/make/libexec/gnubin:$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin:$PATH"
 
 curl -L "https://github.com/redis/redis/archive/refs/heads/unstable.tar.gz" -o redis-unstable.tar.gz
 tar xzf redis-unstable.tar.gz
@@ -19,7 +19,8 @@ yq -i '.modules[].ref = "master"' redis-unstable/modules/modules.yaml
 make -C redis-unstable modules-update MODULES_UPDATE_SHALLOW=1
 
 mkdir -p build_dir/etc
-make -C redis-unstable -j "$(nproc)" deploy PREFIX=$(pwd)/build_dir
+# RediSearch's macOS dependency check only accepts Homebrew LLVM clang; skip it as homebrew-core does.
+make -C redis-unstable -j "$(nproc)" deploy PREFIX=$(pwd)/build_dir IGNORE_MISSING_DEPS=1
 cp ./configs/redis.conf build_dir/etc/redis.conf
 
 # Verify that all required modules were built and installed

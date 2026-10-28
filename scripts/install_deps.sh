@@ -6,7 +6,6 @@ export HOMEBREW_NO_AUTO_UPDATE=1
 brew update
 brew install coreutils
 brew install make
-brew install llvm
 brew install gnu-sed
 brew install automake
 brew install libtool
