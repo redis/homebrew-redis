@@ -11,9 +11,8 @@ PATH="$HOMEBREW_PREFIX/opt/make/libexec/gnubin:$HOMEBREW_PREFIX/opt/gnu-sed/libe
 # RediSearch's macOS dependency check only accepts Homebrew LLVM clang; skip it as homebrew-core does.
 export IGNORE_MISSING_DEPS=1
 
-# Pin OpenSSL to the version the cask depends on. Redis defaults to the
-# unversioned $HOMEBREW_PREFIX/opt/openssl, which may point at openssl@4.
-export OPENSSL_PREFIX="$HOMEBREW_PREFIX/opt/openssl@3"
+# Pin OpenSSL to openssl@4, which RediSearch requires on macOS since 8.12.
+export OPENSSL_PREFIX="$HOMEBREW_PREFIX/opt/openssl@4"
 export OPENSSL_ROOT_DIR="$OPENSSL_PREFIX" # CMake-based modules
 export openssl_prefix="$OPENSSL_PREFIX" # RedisTimeSeries
 export PKG_CONFIG_PATH="$OPENSSL_PREFIX/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
@@ -70,9 +69,9 @@ if [ -n "$MISSING_MODULES" ]; then
   exit 1
 fi
 
-# Fail if anything links against an OpenSSL other than openssl@3 (the cask dependency)
+# Fail if anything links against an OpenSSL other than openssl@4 (the cask dependency)
 echo "Verifying OpenSSL linkage..."
-BAD_LINKS=$(for f in build_dir/bin/* "$MODULES_DIR"/*.so; do otool -L "$f" | sed "s|^|$f:|"; done | grep -E '/opt/openssl(@[0-9]+)?/' | grep -v '/opt/openssl@3/' || true)
+BAD_LINKS=$(for f in build_dir/bin/* "$MODULES_DIR"/*.so; do otool -L "$f" | sed "s|^|$f:|"; done | grep -E '/opt/openssl(@[0-9]+)?/' | grep -v '/opt/openssl@4/' || true)
 if [ -n "$BAD_LINKS" ]; then
   echo "ERROR: Binaries linked against an unexpected OpenSSL:"
   echo "$BAD_LINKS"
