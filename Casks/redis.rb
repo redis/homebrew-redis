@@ -10,7 +10,9 @@ cask "redis" do
   depends_on arch: :arm64
   depends_on macos: :sequoia
 
+  # openssl@3 is for releases before 8.12; drop it once the stable cask is built with openssl@4.
   depends_on formula: "openssl@3"
+  depends_on formula: "openssl@4"
   depends_on formula: "libomp"
 
   binaries = %w[
