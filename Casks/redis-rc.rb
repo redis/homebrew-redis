@@ -10,7 +10,7 @@ cask "redis-rc" do
   depends_on arch: :arm64
   depends_on macos: :sequoia
 
-  depends_on formula: "openssl@3"
+  depends_on formula: "openssl@4"
   depends_on formula: "libomp"
 
   binaries = %w[
