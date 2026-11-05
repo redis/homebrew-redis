@@ -27,10 +27,14 @@ runs:
     shell: bash
     run: |
       export HOMEBREW_GITHUB_API_TOKEN=$GITHUB_TOKEN
+      # Homebrew 6.0.0+ requires non-official taps to be trusted before their casks
+      # load. `brew trust` can't reliably trust a tap cloned from a local path like
+      # this one (its remote isn't a stable reference), so skip the check instead.
+      # Persist via GITHUB_ENV since later steps (e.g. Install Redis) run in a new shell.
+      echo "HOMEBREW_NO_REQUIRE_TAP_TRUST=1" >> "$GITHUB_ENV"
+      export HOMEBREW_NO_REQUIRE_TAP_TRUST=1
       brew update
       brew tap ${{ inputs.tap }} .
-      # Homebrew 6.0.0+ refuses non-official taps unless trusted
-      brew trust ${{ inputs.tap }}
   - name: Edit cask file
     shell: bash
     run: |
