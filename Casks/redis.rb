@@ -1,6 +1,6 @@
 cask "redis" do
-  version "8.10.3"
-  sha256 "2d9f2e8940c2117bbecdd25658a2d8813afdbeb9ff24962e88428804831481ec"
+  version "8.12.0"
+  sha256 "c9b16167c7333160b053f9a2df39ea65828826db9620947e0cd31d4851318f3d"
 
   url "https://packages.redis.io/homebrew/redis-oss-#{version}-arm64.zip"
   name "Redis Open Source"
